@@ -1,37 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'app.dart';
+import 'SigninAndSignup.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const ProviderScope(child: App()));
+void main() {
+  runApp(const MyApp());
 }
 
-class ClinicApp extends StatelessWidget {
-  const ClinicApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clinic Booking',
+      debugShowCheckedModeBanner: false,
+      title: 'My Flutter App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Clinic Booking')),
-      body: const Center(child: Text('It works! Next: hook doctors list.')),
+      // 👇 Start app with SignIn & SignUp screen
+      home: const SignInAndSignUp(),
     );
   }
 }

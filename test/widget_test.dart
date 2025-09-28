@@ -5,13 +5,14 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:clinic_booking_frontend/SigninAndSignup.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:clinic_booking_frontend/app.dart';
+import 'package:clinic_booking_frontend/Features/Auth/app.dart';
 
 void main() {
   testWidgets('App builds and shows home content', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pumpWidget(const ProviderScope(child: SignInAndSignUp()));
     expect(find.text('Clinic Booking'), findsOneWidget);
     expect(find.text('It works! Next: hook doctors list.'), findsOneWidget);
   });
