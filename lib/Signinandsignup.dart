@@ -1,32 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dio/dio.dart';
+import 'Dashboard.dart';
 
-void main() {
-  runApp(const Signinandsignup());
-}
-
-class Signinandsignup extends StatelessWidget {
-  const Signinandsignup ({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Clinic Booking App',
-      home: const Signinandsignup(),
-    );
-  }
-}
+// Use --dart-define to override on run. Emulator -> your PC: 10.0.2.2
+const apiBaseUrl = String.fromEnvironment(
+  'API_BASE_URL',
+  defaultValue: 'http://10.0.2.2:8080',
+);
 
 class SignInAndSignUp extends StatefulWidget {
   const SignInAndSignUp({super.key});
 
   @override
-  State<SignInAndSignUp> createState() => _LoginPageState();
+  State<SignInAndSignUp> createState() => _SignInAndSignUpState();
 }
 
-class _LoginPageState extends State<SignInAndSignUp> {
-  bool _obscurePassword = true; // For password visibility toggle
+class _SignInAndSignUpState extends State<SignInAndSignUp> {
+  bool _obscurePassword = true;
+  bool _loading = false;
 
+  // Sign In controllers
+  final _signInEmailController = TextEditingController();
+  final _signInPasswordController = TextEditingController();
+
+  // Sign Up controllers
+  final _signUpNameController = TextEditingController();
+  final _signUpEmailController = TextEditingController();
+  final _signUpPhoneController = TextEditingController();
+  final _signUpPasswordController = TextEditingController();
+
+  late final Dio _dio;
+
+  @override
+  void initState() {
+    super.initState();
+    _dio = Dio(BaseOptions(baseUrl: apiBaseUrl));
+  }
+
+  @override
+  void dispose() {
+    _signInEmailController.dispose();
+    _signInPasswordController.dispose();
+    _signUpNameController.dispose();
+    _signUpEmailController.dispose();
+    _signUpPhoneController.dispose();
+    _signUpPasswordController.dispose();
+    super.dispose();
+  }
+
+  // ============ Auth + Backend sync ============
+  Future<void> _signInEmailPassword() async {
+    try {
+      final email = _signInEmailController.text.trim();
+      final password = _signInPasswordController.text;
+      if (email.isEmpty || password.isEmpty) {
+        _showSnack('Enter email and password');
+        return;
+      }
+      _setLoading(true);
+      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      await _syncProfileWithBackend();
+      if (!mounted) return;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Dashboard()));
+    } catch (e) {
+      _showSnack('Sign in failed: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _signUpEmailPassword() async {
+    try {
+      final name = _signUpNameController.text.trim();
+      final email = _signUpEmailController.text.trim();
+      final phone = _signUpPhoneController.text.trim();
+      final password = _signUpPasswordController.text;
+
+      if (name.isEmpty || email.isEmpty || password.isEmpty) {
+        _showSnack('Name, email and password are required');
+        return;
+      }
+      _setLoading(true);
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      await _syncProfileWithBackend(name: name, phone: phone);
+      if (!mounted) return;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Dashboard()));
+    } catch (e) {
+      _showSnack('Sign up failed: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Calls your Node API with Firebase ID token:
+  // - GET /v1/me (creates users/{uid} if missing, role='patient')
+  // - PATCH /v1/me with name/phone (if provided on sign up)
+  Future<void> _syncProfileWithBackend({String? name, String? phone}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final token = await user.getIdToken();
+    _dio.options.headers['Authorization'] = 'Bearer $token';
+
+    await _dio.get('/v1/me');
+
+    final body = <String, dynamic>{};
+    if ((name ?? '').isNotEmpty) body['name'] = name;
+    if ((phone ?? '').isNotEmpty) body['phone'] = phone;
+    if (body.isNotEmpty) await _dio.patch('/v1/me', data: body);
+  }
+
+  Future<void> _sendReset() async {
+    try {
+      final email = _signInEmailController.text.trim();
+      if (email.isEmpty) {
+        _showSnack('Enter your email first');
+        return;
+      }
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showSnack('Reset email sent');
+    } catch (e) {
+      _showSnack('Failed to send reset email: $e');
+    }
+  }
+
+  void _setLoading(bool v) {
+    if (mounted) setState(() => _loading = v);
+  }
+
+  void _showSnack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  // ============ UI ============
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,28 +185,22 @@ class _LoginPageState extends State<SignInAndSignUp> {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.favorite_border,
-                      size: 50, color: Colors.white),
+                  child: const Icon(Icons.favorite_border, size: 50, color: Colors.white),
                 ),
 
                 const SizedBox(height: 12),
                 const Text(
                   "MediCare+",
-                  style: TextStyle(
-                    fontSize: 28,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 30),
 
-                //Card Container
+                // Card Container
                 Expanded(
                   child: Container(
                     width: double.infinity,
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
+                    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -124,22 +226,14 @@ class _LoginPageState extends State<SignInAndSignUp> {
                             child: const TabBar(
                               indicator: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.all(Radius.zero),
+                                borderRadius: BorderRadius.all(Radius.zero),
                               ),
                               dividerColor: Colors.transparent,
                               labelColor: Colors.black,
                               unselectedLabelColor: Colors.grey,
                               tabs: [
-                                SizedBox(
-                                  width: 150,
-                                  child: Tab(text: "Sign In"),
-                                ),
-                                 SizedBox(
-                                  width: 150,
-                                  child: Tab(text: "Sign Up"),
-                                 )
-                                
+                                SizedBox(width: 150, child: Tab(text: "Sign In")),
+                                SizedBox(width: 150, child: Tab(text: "Sign Up")),
                               ],
                             ),
                           ),
@@ -150,15 +244,13 @@ class _LoginPageState extends State<SignInAndSignUp> {
                           Expanded(
                             child: TabBarView(
                               children: [
-                                // Sign In Tab
+                                // ========== Sign In Tab ==========
                                 SingleChildScrollView(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Email / Phone
                                       const Text(
-                                        "Email or Phone Number",
+                                        "Email",
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,
@@ -166,21 +258,19 @@ class _LoginPageState extends State<SignInAndSignUp> {
                                         ),
                                       ),
                                       TextField(
+                                        controller: _signInEmailController,
+                                        keyboardType: TextInputType.emailAddress,
                                         decoration: InputDecoration(
-                                          prefixIcon:
-                                              const Icon(Icons.email_outlined),
-                                          hintText:
-                                              "Enter your email or phone number",
+                                          prefixIcon: const Icon(Icons.email_outlined),
+                                          hintText: "Enter your email",
                                           border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
+                                            borderRadius: BorderRadius.circular(20),
                                           ),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
 
-                                      // Password
-                                       const Text(
+                                      const Text(
                                         "Password",
                                         style: TextStyle(
                                           fontSize: 16,
@@ -189,38 +279,27 @@ class _LoginPageState extends State<SignInAndSignUp> {
                                         ),
                                       ),
                                       TextField(
+                                        controller: _signInPasswordController,
                                         obscureText: _obscurePassword,
                                         decoration: InputDecoration(
-                                          prefixIcon:
-                                              const Icon(Icons.lock_outline),
+                                          prefixIcon: const Icon(Icons.lock_outline),
                                           hintText: "Enter your password",
                                           border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
+                                            borderRadius: BorderRadius.circular(20),
                                           ),
                                           suffixIcon: IconButton(
-                                            icon: Icon(
-                                              _obscurePassword
-                                                  ? Icons.visibility_off
-                                                  : Icons.visibility,
-                                            ),
-                                            onPressed: () {
-                                              setState(() {
-                                                _obscurePassword =
-                                                    !_obscurePassword;
-                                              });
-                                            },
+                                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                                           ),
                                         ),
                                       ),
 
                                       const SizedBox(height: 10),
 
-                                      // Forgot Password
                                       Align(
                                         alignment: Alignment.centerRight,
                                         child: TextButton(
-                                          onPressed: () {},
+                                          onPressed: _loading ? null : _sendReset,
                                           child: const Text(
                                             "Forgot Password?",
                                             style: TextStyle(
@@ -233,40 +312,30 @@ class _LoginPageState extends State<SignInAndSignUp> {
 
                                       const SizedBox(height: 10),
 
-                                      // Sign In Button
                                       SizedBox(
                                         width: double.infinity,
                                         height: 50,
                                         child: ElevatedButton(
-                                          onPressed: () {},
+                                          onPressed: _loading ? null : _signInEmailPassword,
                                           style: ElevatedButton.styleFrom(
                                             padding: EdgeInsets.zero,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
-                                            ),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                                           ),
                                           child: Ink(
                                             decoration: BoxDecoration(
-                                              gradient:
-                                                  const LinearGradient(
-                                                colors: [
-                                                  Color(0xff206c64),
-                                                  Color(0xff2e7d32),
-                                                ],
+                                              gradient: const LinearGradient(
+                                                colors: [Color(0xff206c64), Color(0xff2e7d32)],
                                               ),
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
+                                              borderRadius: BorderRadius.circular(30),
                                             ),
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              child: const Text(
+                                            child: Center(
+                                              child: _loading
+                                                  ? const SizedBox(
+                                                height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                              )
+                                                  : const Text(
                                                 "Sign In",
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                           ),
@@ -276,151 +345,97 @@ class _LoginPageState extends State<SignInAndSignUp> {
                                   ),
                                 ),
 
-                                // Sign Up Tab - FIXED
+                                // ========== Sign Up Tab ==========
                                 SingleChildScrollView(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Full Name
                                       const Text(
                                         "Full Name",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
                                       ),
                                       TextField(
+                                        controller: _signUpNameController,
                                         decoration: InputDecoration(
-                                          prefixIcon:
-                                              const Icon(Icons.person_outline),
+                                          prefixIcon: const Icon(Icons.person_outline),
                                           hintText: "Enter your full name",
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
 
-                                      // Email / Phone
                                       const Text(
-                                        "Email Address(Optional)",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
+                                        "Email Address",
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
                                       ),
                                       TextField(
+                                        controller: _signUpEmailController,
+                                        keyboardType: TextInputType.emailAddress,
                                         decoration: InputDecoration(
-                                          prefixIcon:
-                                              const Icon(Icons.email_outlined),
-                                          hintText:
-                                              "Enter your email Address",
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
+                                          prefixIcon: const Icon(Icons.email_outlined),
+                                          hintText: "Enter your email address",
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
 
-                                      //phone number
                                       const Text(
-                                        "Phone Number",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
+                                        "Phone Number (optional)",
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
                                       ),
                                       TextField(
+                                        controller: _signUpPhoneController,
+                                        keyboardType: TextInputType.phone,
                                         decoration: InputDecoration(
-                                          prefixIcon:
-                                              const Icon(Icons.email_outlined),
-                                          hintText:
-                                              "Enter Your Phone Number",
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
+                                          prefixIcon: const Icon(Icons.phone),
+                                          hintText: "Enter your phone number",
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
 
-                                      // Password
                                       const Text(
                                         "Password",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
                                       ),
                                       TextField(
+                                        controller: _signUpPasswordController,
                                         obscureText: _obscurePassword,
                                         decoration: InputDecoration(
-                                          prefixIcon:
-                                              const Icon(Icons.lock_outline),
-                                          hintText: "Enter your password",
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
+                                          prefixIcon: const Icon(Icons.lock_outline),
+                                          hintText: "Create a password",
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                                           suffixIcon: IconButton(
-                                            icon: Icon(
-                                              _obscurePassword
-                                                  ? Icons.visibility_off
-                                                  : Icons.visibility,
-                                            ),
-                                            onPressed: () {
-                                              setState(() {
-                                                _obscurePassword =
-                                                    !_obscurePassword;
-                                              });
-                                            },
+                                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                                           ),
                                         ),
                                       ),
 
                                       const SizedBox(height: 20),
 
-                                      // Sign Up Button
                                       SizedBox(
                                         width: double.infinity,
                                         height: 50,
                                         child: ElevatedButton(
-                                          onPressed: () {},
+                                          onPressed: _loading ? null : _signUpEmailPassword,
                                           style: ElevatedButton.styleFrom(
                                             padding: EdgeInsets.zero,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
-                                            ),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                                           ),
                                           child: Ink(
                                             decoration: BoxDecoration(
-                                              gradient:
-                                                  const LinearGradient(
-                                                colors: [
-                                                  Color(0xff206c64),
-                                                  Color(0xff2e7d32),
-                                                ],
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
+                                              gradient: const LinearGradient(colors: [Color(0xff206c64), Color(0xff2e7d32)]),
+                                              borderRadius: BorderRadius.circular(30),
                                             ),
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              child: const Text(
+                                            child: Center(
+                                              child: _loading
+                                                  ? const SizedBox(
+                                                height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                              )
+                                                  : const Text(
                                                 "Create Account",
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                           ),
@@ -440,6 +455,16 @@ class _LoginPageState extends State<SignInAndSignUp> {
               ],
             ),
           ),
+
+          // Optional loading overlay
+          if (_loading)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  color: Colors.black.withOpacity(0.05),
+                ),
+              ),
+            ),
         ],
       ),
     );
