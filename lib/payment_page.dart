@@ -215,7 +215,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   const SnackBar(content: Text("Payment Successful ✅")),
                 );
               },
-              
+
               label: Text("Pay \Rs.${widget.totalAmount.toStringAsFixed(2)}"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,

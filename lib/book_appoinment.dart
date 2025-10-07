@@ -14,7 +14,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   String? selectedTime;
   final TextEditingController notesController = TextEditingController();
 
-  // 💰 Add total amount variable
+  //  Add total amount variable
   final double consultationFee = 2500;
   final double platformFee = 500;
 
