@@ -1,20 +1,9 @@
+import 'package:clinic_booking_frontend/book_appoinment.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const DoctorProfileApp());
-}
 
-class DoctorProfileApp extends StatelessWidget {
-  const DoctorProfileApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const DoctorProfilePage(),
-    );
-  }
-}
+
 
 class DoctorProfilePage extends StatelessWidget {
   const DoctorProfilePage({super.key});
@@ -22,6 +11,7 @@ class DoctorProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
         child: Column(
@@ -157,11 +147,21 @@ class DoctorProfilePage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Center(
-                  child: Text(
-                    "Book Appointment",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                            context,
+                        MaterialPageRoute(builder: (context) => const BookAppointmentPage()),
+                         );
+                   },
+                  
+                  child: const Center(
+                    child: Text(
+                      "Book Appointment",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
+                  
                 ),
               ),
             ),
