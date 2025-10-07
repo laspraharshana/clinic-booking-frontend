@@ -7,55 +7,129 @@ class DoctorProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header
+            // Header with Doctor Info
             Container(
-              padding: const EdgeInsets.all(16),
+              
+
+              padding: const EdgeInsets.fromLTRB(26, 10, 16, 24),
               decoration: const BoxDecoration(
-                color: Color(0xFF00695C),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF00695C), Color.fromARGB(255, 12, 68, 62)],
+                ),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
                 ),
               ),
+              
               child: Column(
                 children: [
-                  const SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundImage: AssetImage(
-                      "assets/doctor.jpg",
-                    ), // add your doctor image
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "Dr. Sarah Johnson",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text(
-                    "Cardiology",
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  // Back button and icons row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.more_vert, color: Colors.white),
+                        onPressed: () {},
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
+                  
+                  // Doctor Image and Info
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.star, color: Colors.amber, size: 18),
-                      SizedBox(width: 4),
-                      Text(
-                        "4.9 (124 reviews)",
-                        style: TextStyle(color: Colors.white),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white, width: 3),
+                          image: const DecorationImage(
+                            image: AssetImage("assets/doctor.jpg"),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 8),
-                      Icon(Icons.check_circle, color: Colors.lightGreenAccent),
-                      Text(" Available", style: TextStyle(color: Colors.white)),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Dr. Sarah Johnson",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              "Cardiology",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: const [
+                                Icon(Icons.star, color: Colors.amber, size: 16),
+                                SizedBox(width: 4),
+                                Text(
+                                  "4.9 (124 reviews)",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.lightGreenAccent,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Color(0xFF00695C),
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "Available",
+                                    style: TextStyle(
+                                      color: Color(0xFF00695C),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -64,104 +138,162 @@ class DoctorProfilePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Experience / Patients / Rating Row
+            // Stats Row
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _infoCard("15+", "Years Exp", Icons.work),
-                  _infoCard("500+", "Patients", Icons.people),
-                  _infoCard("4.9", "Rating", Icons.star),
+                  Expanded(
+                    child: _statCard(Icons.work_outline, "15+", "Years Exp"),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _statCard(Icons.people_outline, "500+", "Patients"),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _statCard(Icons.star_outline, "4.9", "Rating"),
+                  ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // About
-            _sectionCard(
-              "About",
-              "Experienced cardiologist with 15+ years in cardiac care and interventional procedures.",
+            // About Section
+            _buildSection(
+              title: "About",
+              child: const Text(
+                "Experienced cardiologist with 15+ years in cardiac care and interventional procedures.",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+              ),
             ),
 
-            // Location
-            _sectionCard(
-              "Location",
-              "",
+            // Location Section
+            _buildSection(
+              title: "Location",
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "City General Hospital\n123 Medical Center Dr, Suite 200",
-                    style: TextStyle(fontSize: 14),
+                  Row(
+                    children: const [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 18,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          "City General Hospital",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 26),
+                    child: Text(
+                      "123 Medical Center Dr, Suite 200",
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Map placeholder
+                  Container(
+                    height: 140,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.map_outlined,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                "Interactive map",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  Container(
-                    height: 120,
-                    color: Colors.grey[200],
-                    child: const Center(
-                      child: Text(
-                        "Interactive map",
-                        style: TextStyle(color: Colors.grey),
+
+                  // Get Directions Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Color(0xFF00695C),
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.teal),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      child: const Text(
+                        "Get Directions",
+                        style: TextStyle(
+                          color: Color(0xFF00695C),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      "Get Directions",
-                      style: TextStyle(color: Colors.teal),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Availability & Pricing
-            _sectionCard(
-              "Availability & Pricing",
-              "",
+            // Availability & Pricing Section
+            _buildSection(
+              title: "Availability & Pricing",
               child: Column(
                 children: [
-                  ListTile(
-                    leading: const Icon(Icons.access_time, color: Colors.teal),
-                    title: const Text("Next Available"),
-                    trailing: const Text("Today 2:30 PM"),
+                  _infoRow(
+                    Icons.access_time_outlined,
+                    "Next Available",
+                    "Today 2:30 PM",
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.attach_money, color: Colors.teal),
-                    title: const Text("Consultation Fee"),
-                    trailing: const Text("\$150"),
-                  ),
+                  const SizedBox(height: 12),
+                  _infoRow(Icons.attach_money, "Consultation Fee", "\$150"),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
             // Book Appointment Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: GestureDetector(
-                  onTap: () {
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -169,12 +301,18 @@ class DoctorProfilePage extends StatelessWidget {
                       ),
                     );
                   },
-
-                  child: const Center(
-                    child: Text(
-                      "Book Appointment",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+                  icon: const Icon(Icons.calendar_today, size: 18),
+                  label: const Text(
+                    "Book Appointment",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00695C),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    elevation: 0,
                   ),
                 ),
               ),
@@ -187,34 +325,51 @@ class DoctorProfilePage extends StatelessWidget {
     );
   }
 
-  // Info card widget
-  Widget _infoCard(String value, String label, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.teal, size: 28),
-        const SizedBox(height: 6),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        Text(label, style: const TextStyle(color: Colors.grey)),
-      ],
+  Widget _statCard(IconData icon, String value, String label) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF00695C), size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+        ],
+      ),
     );
   }
 
-  // Section card widget
-  Widget _sectionCard(String title, String description, {Widget? child}) {
+  Widget _buildSection({required String title, required Widget child}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -223,14 +378,46 @@ class DoctorProfilePage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
-          const SizedBox(height: 8),
-          if (description.isNotEmpty)
-            Text(description, style: const TextStyle(fontSize: 14)),
-          if (child != null) child,
+          const SizedBox(height: 12),
+          child,
         ],
       ),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF00695C).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 20, color: const Color(0xFF00695C)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+      ],
     );
   }
 }
