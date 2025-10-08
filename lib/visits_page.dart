@@ -1,6 +1,5 @@
 import 'package:clinic_booking_frontend/dasboard.dart';
 import 'package:flutter/material.dart';
-//import 'Dashboard.dart';
 
 class VisitsPage extends StatefulWidget {
   const VisitsPage({super.key});
@@ -33,7 +32,7 @@ class _VisitsPageState extends State<VisitsPage>
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const Dashboard()),
+          MaterialPageRoute(builder: (_) => Dashboard()),
         );
         break;
       case 1:

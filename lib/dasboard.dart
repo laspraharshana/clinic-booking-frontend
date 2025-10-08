@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'visits_page.dart';
+import 'package:clinic_booking_frontend/visits_page.dart';
 
 // Dummy Placeholder Page
 class PlaceholderPage extends StatelessWidget {
@@ -38,7 +38,7 @@ class _DashboardState extends State<Dashboard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Find Page"),
+            builder: (context) => PlaceholderPage(title: "Find Page"),
           ),
         );
         break;
@@ -46,21 +46,21 @@ class _DashboardState extends State<Dashboard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Add New Page"),
+            builder: (context) => PlaceholderPage(title: "Add New Page"),
           ),
         );
         break;
       case 3:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const VisitsPage()),
+          MaterialPageRoute(builder: (_) => VisitsPage()),
         );
         break;
       case 4:
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Profile Page"),
+            builder: (context) => PlaceholderPage(title: "Profile Page"),
           ),
         );
         break;
