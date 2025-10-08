@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'visits_page.dart';
 
 // Dummy Placeholder Page
 class PlaceholderPage extends StatelessWidget {
@@ -52,11 +53,9 @@ class _DashboardState extends State<Dashboard> {
         );
         break;
       case 3:
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const PlaceholderPage(title: "Visits Page")),
+          MaterialPageRoute(builder: (_) => const VisitsPage()),
         );
         break;
       case 4:

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/dashboard.dart';
+import 'Dashboard.dart';
 
 class VisitsPage extends StatefulWidget {
   const VisitsPage({super.key});
@@ -128,10 +128,10 @@ class _VisitsPageState extends State<VisitsPage>
 
               // 👇 wider gradient “pill”
               indicatorPadding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               indicatorSize: TabBarIndicatorSize.tab,
               labelPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
 
               indicator: BoxDecoration(
                 gradient: const LinearGradient(
@@ -145,7 +145,7 @@ class _VisitsPageState extends State<VisitsPage>
               labelStyle: const TextStyle(
                   fontSize: 14, fontWeight: FontWeight.bold),
               unselectedLabelStyle:
-                  const TextStyle(fontWeight: FontWeight.w500),
+              const TextStyle(fontWeight: FontWeight.w500),
               tabs: const [
                 Tab(text: "Upcoming (0)"),
                 Tab(text: "Completed (0)"),
@@ -194,9 +194,9 @@ class _VisitsPageState extends State<VisitsPage>
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
         decoration: isSelected
             ? BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(20),
-              )
+          color: Colors.green[50],
+          borderRadius: BorderRadius.circular(20),
+        )
             : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -209,7 +209,7 @@ class _VisitsPageState extends State<VisitsPage>
               style: TextStyle(
                 fontSize: 12,
                 fontWeight:
-                    isSelected ? FontWeight.bold : FontWeight.normal,
+                isSelected ? FontWeight.bold : FontWeight.normal,
                 color: isSelected
                     ? const Color(0xFF1B5E57)
                     : Colors.grey,
@@ -248,62 +248,67 @@ class _VisitsPageState extends State<VisitsPage>
   // ---------- Card for Upcoming (with button) ----------
   Widget _buildUpcomingState(
       IconData icon, Color color, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 250),
-      child: Center(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: color, size: 60),
-              const SizedBox(height: 20),
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(subtitle,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.black54)),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content:
-                            Text("Booking feature coming soon on this page!")),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1B5E57),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+    // 👇 WRAP the content in a SingleChildScrollView to handle overflow from fixed padding (250)
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 250),
+        child: Center(
+          // Center's child must also have constrained width if using SingleChildScrollView,
+          // but since the Container has width: double.infinity, it's fine.
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                )
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: 60),
+                const SizedBox(height: 20),
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text(subtitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.black54)),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                          Text("Booking feature coming soon on this page!")),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1B5E57),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-                ),
-                child: const Text(
-                  "Book Appointment",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                  child: const Text(
+                    "Book Appointment",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -313,40 +318,43 @@ class _VisitsPageState extends State<VisitsPage>
   // ---------- Card for Completed/Cancelled (no button) ----------
   Widget _buildEmptyState(
       IconData icon, Color color, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      child: Center(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: color, size: 60),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black54),
-              ),
-            ],
+    // 👇 WRAP the content in a SingleChildScrollView for general robustness
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Center(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                )
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: 60),
+                const SizedBox(height: 20),
+                Text(
+                  title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.black54),
+                ),
+              ],
+            ),
           ),
         ),
       ),
