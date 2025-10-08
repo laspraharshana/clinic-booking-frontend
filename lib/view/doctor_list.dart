@@ -2,6 +2,40 @@ import 'package:flutter/material.dart';
 import 'doctor_profile.dart';
 
 
+
+/*
+
+          DATABASE SUGGESSION
+          
+comment for  database data Line no (314   , 324 - 419)
+Future<void> _loadDoctors() async {
+  // Example with Firebase
+  final snapshot = await FirebaseFirestore.instance
+      .collection('doctors')
+      .get();
+  
+  setState(() {
+    allDoctors = snapshot.docs
+        .map((doc) => Doctor.fromJson(doc.data()))
+        .toList();
+    filteredDoctors = allDoctors;
+  });
+}
+
+
+Include Database with these
+{
+  "id": "doc123",
+  "name": "Dr. Sarah Johnson",
+  "specialty": "Cardiology",
+  "imageUrl": "https://...",
+  "rating": 4.9,
+  "consultationFee": 150
+}
+*/
+
+
+
 // Doctor Model
 class Doctor {
   final String id;
@@ -304,7 +338,7 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
                     itemCount: filteredDoctors.length,
                     itemBuilder: (context, index) {
                       final doctor = filteredDoctors[index];
-                      //sreturn _buildDoctorCard(doctor);
+                      //return _buildDoctorCard(doctor);
                     },
                   ),
           ),
