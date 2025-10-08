@@ -1,5 +1,6 @@
+import 'package:clinic_booking_frontend/dasboard.dart';
 import 'package:flutter/material.dart';
-import 'Dashboard.dart';
+//import 'Dashboard.dart';
 
 class VisitsPage extends StatefulWidget {
   const VisitsPage({super.key});

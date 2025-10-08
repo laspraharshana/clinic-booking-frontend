@@ -1,7 +1,8 @@
+import 'package:clinic_booking_frontend/dasboard.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
-import 'Dashboard.dart';
+//import 'Dashboard.dart';
 
 // Use --dart-define to override on run. Emulator -> your PC: 10.0.2.2
 const apiBaseUrl = String.fromEnvironment(
