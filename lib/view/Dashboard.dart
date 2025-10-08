@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'doctor_list.dart';
 import 'visits_page.dart';
 
 // Dummy Placeholder Page
@@ -37,9 +38,7 @@ class _DashboardState extends State<Dashboard> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Find Page"),
-          ),
+          MaterialPageRoute(builder: (context) => AllDoctorsPage()),
         );
         break;
       case 2:
