@@ -1,4 +1,5 @@
 import 'package:clinic_booking_frontend/dasboard.dart';
+import 'package:clinic_booking_frontend/signin_signup.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Clinic Booking',
       theme: ThemeData(primarySwatch: Colors.blue),
       // 👇 Start app with SignIn & SignUp screen
-      home: const Dashboard(),
+      home: const SignInAndSignUp(),
     );
   }
 }

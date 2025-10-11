@@ -2,6 +2,8 @@ import 'package:clinic_booking_frontend/dasboard.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
+
+import 'admin_dashbord.dart';
 //import 'Dashboard.dart';
 
 // Use --dart-define to override on run. Emulator -> your PC: 10.0.2.2
@@ -406,6 +408,35 @@ class _SignInAndSignUpState extends State<SignInAndSignUp> {
                                                             FontWeight.bold,
                                                       ),
                                                     ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+
+                                      // 🔽 Admin Access Text Button
+                                      Center(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const AdminDashboard(),
+                                              ),
+                                            );
+                                          },
+                                          child: const Text(
+                                            "Admin Access",
+                                            style: TextStyle(
+                                              color: Color.fromARGB(
+                                                255,
+                                                20,
+                                                27,
+                                                27,
+                                              ),
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 16,
                                             ),
                                           ),
                                         ),
