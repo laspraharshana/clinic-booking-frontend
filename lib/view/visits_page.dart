@@ -1,3 +1,6 @@
+import 'package:clinic_booking_frontend/view/doctor_list.dart';
+import 'package:clinic_booking_frontend/view/patient_profile.dart';
+
 import 'book_appoinment.dart';
 import 'package:flutter/material.dart';
 import 'Dashboard.dart';
@@ -37,9 +40,10 @@ class _VisitsPageState extends State<VisitsPage>
         );
         break;
       case 1:
-        ScaffoldMessenger.of(
+        Navigator.pushReplacement(
           context,
-        ).showSnackBar(const SnackBar(content: Text("Find Page Placeholder")));
+          MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
+        );
         break;
       case 2:
         ScaffoldMessenger.of(context).showSnackBar(
@@ -47,10 +51,15 @@ class _VisitsPageState extends State<VisitsPage>
         );
         break;
       case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const VisitsPage()),
+        );
         break; // already here
       case 4:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile Page Placeholder")),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PatientProfilePage()),
         );
         break;
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'Bottom_navbar.dart';
 import 'doctor_list.dart';
 import 'patient_profile.dart';
 import 'visits_page.dart';
@@ -30,71 +31,73 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int _selectedIndex = 0;
 
-  void _onBottomNavTapped(int index) {
-    setState(() => _selectedIndex = index);
+  // void _onBottomNavTapped(int index) {
+  //   setState(() => _selectedIndex = index);
 
-    switch (index) {
-      case 0:
-        break; // Home - stay here
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AllDoctorsPage()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Add New Page"),
-          ),
-        );
-        break;
-      case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const VisitsPage()),
-        );
-        break;
-      case 4:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const PatientProfilePage()),
-        );
-        break;
-    }
-  }
+  //   switch (index) {
+  //     case 0:
+  //       break; // Home - stay here
+  //     case 1:
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(builder: (context) => AllDoctorsPage()),
+  //       );
+  //       break;
+  //     case 2:
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => const PlaceholderPage(title: "Add New Page"),
+  //         ),
+  //       );
+  //       break;
+  //     case 3:
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(builder: (_) => const VisitsPage()),
+  //       );
+  //       break;
+  //     case 4:
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(builder: (_) => const PatientProfilePage()),
+  //       );
+  //       break;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const BottomNavBar(
+        selectedIndex: 0,
+      ), // 0-4 for different pages
       backgroundColor: Colors.grey[100],
 
-      // ✅ Custom Bottom Navigation
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(Icons.home, "Home", 0),
-            _buildNavItem(Icons.search, "Find", 1),
-            _buildCenterAddButton(2),
-            _buildNavItem(Icons.calendar_today, "Visits", 3),
-            _buildNavItem(Icons.person, "Profile", 4),
-          ],
-        ),
-      ),
-
+      // // ✅ Custom Bottom Navigation
+      // bottomNavigationBar: Container(
+      //   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      //   decoration: BoxDecoration(
+      //     color: Colors.white,
+      //     boxShadow: [
+      //       BoxShadow(
+      //         color: Colors.black12.withOpacity(0.1),
+      //         blurRadius: 6,
+      //         offset: const Offset(0, -2),
+      //       ),
+      //     ],
+      //   ),
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+      //     children: [
+      //       _buildNavItem(Icons.home, "Home", 0),
+      //       _buildNavItem(Icons.search, "Find", 1),
+      //       _buildCenterAddButton(2),
+      //       _buildNavItem(Icons.calendar_today, "Visits", 3),
+      //       _buildNavItem(Icons.person, "Profile", 4),
+      //     ],
+      //   ),
+      // ),
       body: _buildDashboardBody(),
     );
   }
@@ -300,63 +303,63 @@ class _DashboardState extends State<Dashboard> {
 
   // === Helpers ===
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    bool isSelected = _selectedIndex == index;
-    return GestureDetector(
-      onTap: () => _onBottomNavTapped(index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(20),
-              )
-            : null,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 4),
-            if (isSelected)
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF1B5E57),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildNavItem(IconData icon, String label, int index) {
+  //   bool isSelected = _selectedIndex == index;
+  //   return GestureDetector(
+  //     onTap: () => _onBottomNavTapped(index),
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
+  //       decoration: isSelected
+  //           ? BoxDecoration(
+  //               color: Colors.green[50],
+  //               borderRadius: BorderRadius.circular(20),
+  //             )
+  //           : null,
+  //       child: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Icon(
+  //             icon,
+  //             color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
+  //           ),
+  //           const SizedBox(height: 4),
+  //           Text(
+  //             label,
+  //             style: TextStyle(
+  //               fontSize: 12,
+  //               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  //               color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
+  //             ),
+  //           ),
+  //           const SizedBox(height: 4),
+  //           if (isSelected)
+  //             Container(
+  //               width: 6,
+  //               height: 6,
+  //               decoration: const BoxDecoration(
+  //                 shape: BoxShape.circle,
+  //                 color: Color(0xFF1B5E57),
+  //               ),
+  //             ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildCenterAddButton(int index) {
-    return GestureDetector(
-      onTap: () => _onBottomNavTapped(index),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1B5E57),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
-      ),
-    );
-  }
+  // Widget _buildCenterAddButton(int index) {
+  //   return GestureDetector(
+  //     onTap: () => _onBottomNavTapped(index),
+  //     child: Container(
+  //       padding: const EdgeInsets.all(12),
+  //       decoration: BoxDecoration(
+  //         color: const Color(0xFF1B5E57),
+  //         borderRadius: BorderRadius.circular(16),
+  //       ),
+  //       child: const Icon(Icons.add, color: Colors.white, size: 28),
+  //     ),
+  //   );
+  // }
 
   Widget _buildStatCard(
     String title,

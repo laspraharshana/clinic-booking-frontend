@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'Bottom_navbar.dart';
+
 class PatientProfilePage extends StatelessWidget {
   const PatientProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const BottomNavBar(
+        selectedIndex: 4,
+      ), // 0-4 for different pages
       backgroundColor: Colors.grey[50],
       body: SingleChildScrollView(
         child: Column(

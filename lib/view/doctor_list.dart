@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'Bottom_navbar.dart';
 import 'doctor_profile.dart';
-
-
 
 /*
 
@@ -33,8 +32,6 @@ Include Database with these
   "consultationFee": 150
 }
 */
-
-
 
 // Doctor Model
 class Doctor {
@@ -149,9 +146,11 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
     String query = searchController.text.toLowerCase();
     setState(() {
       filteredDoctors = allDoctors.where((doctor) {
-        bool matchesSearch = doctor.name.toLowerCase().contains(query) ||
+        bool matchesSearch =
+            doctor.name.toLowerCase().contains(query) ||
             doctor.specialty.toLowerCase().contains(query);
-        bool matchesSpecialty = selectedSpecialty == 'All Specialties' ||
+        bool matchesSpecialty =
+            selectedSpecialty == 'All Specialties' ||
             doctor.specialty == selectedSpecialty;
         return matchesSearch && matchesSpecialty;
       }).toList();
@@ -169,6 +168,9 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const BottomNavBar(
+        selectedIndex: 1,
+      ), // 0-4 for different pages
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         leading: IconButton(
@@ -347,7 +349,7 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
     );
   }
 
- /* Widget _buildDoctorCard(Doctor doctor) {
+  /* Widget _buildDoctorCard(Doctor doctor) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
