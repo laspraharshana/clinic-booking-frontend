@@ -167,7 +167,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> {
         children: [
           _buildStatCard(
             'Total Revenue',
-            '\$${totalRevenue.toStringAsFixed(0)}',
+            '\LKR ${totalRevenue.toStringAsFixed(0)}',
             '+5.2%',
             Icons.attach_money,
             const Color(0xFF008B8B),
