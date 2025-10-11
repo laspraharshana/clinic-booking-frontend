@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-void main() {
-  runApp(const MyAppointmentsApp());
-}
 
 class MyAppointmentsApp extends StatelessWidget {
   const MyAppointmentsApp({super.key});
@@ -76,7 +73,6 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage>
               Tab(text: "Upcoming (0)"),
               Tab(text: "Completed (0)"),
               Tab(text: "Cancelled (0)"),
-              
             ],
           ),
         ),
@@ -85,12 +81,18 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildEmptyCard("No Upcoming Appointments",
-              "Book your next appointment with a doctor"),
-          _buildEmptyCard("No Completed Appointments",
-              "Your completed appointments will appear here"),
-          _buildEmptyCard("No Cancelled Appointments",
-              "Your cancelled appointments will appear here"),
+          _buildEmptyCard(
+            "No Upcoming Appointments",
+            "Book your next appointment with a doctor",
+          ),
+          _buildEmptyCard(
+            "No Completed Appointments",
+            "Your completed appointments will appear here",
+          ),
+          _buildEmptyCard(
+            "No Cancelled Appointments",
+            "Your cancelled appointments will appear here",
+          ),
         ],
       ),
 
@@ -103,10 +105,11 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage>
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: "Find"),
+          BottomNavigationBarItem(icon: Icon(Icons.add_box_rounded), label: ""),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add_box_rounded), label: ""),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today), label: "Visits"),
+            icon: Icon(Icons.calendar_today),
+            label: "Visits",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
@@ -132,13 +135,11 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.calendar_today,
-                size: 48, color: Colors.grey),
+            const Icon(Icons.calendar_today, size: 48, color: Colors.grey),
             const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
             Text(
@@ -154,26 +155,14 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 "Book Appointment",
                 style: TextStyle(fontSize: 14, color: Colors.white),
-
-
-
-
-
-
-
-
-
-
-
-
-
-                
               ),
             ),
           ],
