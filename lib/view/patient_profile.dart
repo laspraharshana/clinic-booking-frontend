@@ -1,5 +1,7 @@
+import 'package:clinic_booking_frontend/view/visits_page.dart';
 import 'package:flutter/material.dart';
-
+import 'doctor_list.dart';
+import 'visits_page.dart';
 import 'Bottom_navbar.dart';
 
 class PatientProfilePage extends StatelessWidget {
@@ -131,16 +133,35 @@ class PatientProfilePage extends StatelessWidget {
             // ===== Quick Actions =====
             _buildSectionTitle("Quick Actions"),
             _buildInfoCard([
-              _buildActionRow(
-                Icons.calendar_month_outlined,
-                "My Appointments",
-                const Color(0xFF5B9FED),
-              ),
-              _buildActionRow(
-                Icons.location_on_outlined,
-                "Find Doctors",
-                const Color(0xFF6DDCC3),
-              ),
+               _buildActionRow(
+                  Icons.calendar_month_outlined,
+                  "My Appointments",
+                  const Color(0xFF5B9FED),
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const VisitsPage(),
+                      ),
+                    );
+                  }
+                ),
+              
+             
+               _buildActionRow(
+                  Icons.location_on_outlined,
+                  "Find Doctors",
+                  const Color(0xFF6DDCC3),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AllDoctorsPage(),
+                      ),
+                    );
+                  },
+                ),
+              
             ]),
 
             // ===== Account Settings =====
@@ -150,21 +171,29 @@ class PatientProfilePage extends StatelessWidget {
                 Icons.notifications_outlined,
                 "Notifications",
                 const Color(0xFFB39DDB),
+                onTap: () {},
               ),
               _buildActionRow(
                 Icons.lock_outline,
                 "Privacy & Security",
                 const Color(0xFFFFC774),
+                onTap: () {},
               ),
               _buildActionRow(
                 Icons.credit_card_outlined,
                 "Payment Methods",
                 const Color(0xFF90CAF9),
+                onTap: () {
+                  
+                },
               ),
               _buildActionRow(
                 Icons.settings_outlined,
                 "App Settings",
                 const Color(0xFFB0BEC5),
+                onTap: () {
+                  
+                },
               ),
             ]),
 
@@ -175,11 +204,17 @@ class PatientProfilePage extends StatelessWidget {
                 Icons.help_outline,
                 "Help & FAQ",
                 const Color(0xFF81C784),
+                onTap: () {
+                  
+                },
               ),
               _buildActionRow(
                 Icons.support_agent_outlined,
                 "Contact Support",
                 const Color(0xFF6DDCC3),
+                onTap: () {
+                  
+                },
               ),
             ]),
 
@@ -293,6 +328,7 @@ class PatientProfilePage extends StatelessWidget {
     String label,
     String value,
     Color iconColor,
+    
   ) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -316,7 +352,7 @@ class PatientProfilePage extends StatelessWidget {
     );
   }
 
-  static Widget _buildActionRow(IconData icon, String label, Color iconColor) {
+  static Widget _buildActionRow(IconData icon, String label, Color iconColor, {required Null Function() onTap}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Container(
