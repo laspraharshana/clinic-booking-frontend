@@ -2,37 +2,6 @@ import 'package:flutter/material.dart';
 import 'Bottom_navbar.dart';
 import 'doctor_profile.dart';
 
-/*
-
-          DATABASE SUGGESSION
-          
-comment for  database data Line no (314   , 324 - 419)
-Future<void> _loadDoctors() async {
-  // Example with Firebase
-  final snapshot = await FirebaseFirestore.instance
-      .collection('doctors')
-      .get();
-  
-  setState(() {
-    allDoctors = snapshot.docs
-        .map((doc) => Doctor.fromJson(doc.data()))
-        .toList();
-    filteredDoctors = allDoctors;
-  });
-}
-
-
-Include Database with these
-{
-  "id": "doc123",
-  "name": "Dr. Sarah Johnson",
-  "specialty": "Cardiology",
-  "imageUrl": "https://...",
-  "rating": 4.9,
-  "consultationFee": 150
-}
-*/
-
 // Doctor Model
 class Doctor {
   final String id;
@@ -51,15 +20,14 @@ class Doctor {
     required this.consultationFee,
   });
 
-  // Factory constructor to create Doctor from database/API response
   factory Doctor.fromJson(Map<String, dynamic> json) {
     return Doctor(
       id: json['id'],
       name: json['name'],
       specialty: json['specialty'],
       imageUrl: json['imageUrl'],
-      rating: json['rating'].toDouble(),
-      consultationFee: json['consultationFee'].toDouble(),
+      rating: (json['rating'] as num).toDouble(),
+      consultationFee: (json['consultationFee'] as num).toDouble(),
     );
   }
 }
@@ -78,8 +46,7 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
   List<Doctor> filteredDoctors = [];
   bool isDropdownOpen = false;
 
-  // Sample specialties - fetch from database in real app
-  final List<String> specialties = [
+  final List<String> specialties = const [
     'All Specialties',
     'Cardiology',
     'Neurology',
@@ -101,15 +68,13 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
     super.dispose();
   }
 
-  // Simulate loading doctors from database
   void _loadDoctors() {
-    // In real app, fetch from your database
     allDoctors = [
       Doctor(
         id: '1',
         name: 'Dr. Sarah Johnson',
         specialty: 'Cardiology',
-        imageUrl: 'https://example.com/sarah.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1550831107-1553da8c8464?w=640',
         rating: 4.9,
         consultationFee: 150,
       ),
@@ -117,7 +82,7 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
         id: '2',
         name: 'Dr. Michael Chen',
         specialty: 'Neurology',
-        imageUrl: 'https://example.com/michael.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=640',
         rating: 4.8,
         consultationFee: 180,
       ),
@@ -133,7 +98,7 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
         id: '4',
         name: 'Dr. James Wilson',
         specialty: 'Orthopedics',
-        imageUrl: 'https://example.com/james.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=640',
         rating: 4.9,
         consultationFee: 200,
       ),
@@ -143,16 +108,12 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
   }
 
   void _filterDoctors() {
-    String query = searchController.text.toLowerCase();
+    final query = searchController.text.toLowerCase();
     setState(() {
-      filteredDoctors = allDoctors.where((doctor) {
-        bool matchesSearch =
-            doctor.name.toLowerCase().contains(query) ||
-            doctor.specialty.toLowerCase().contains(query);
-        bool matchesSpecialty =
-            selectedSpecialty == 'All Specialties' ||
-            doctor.specialty == selectedSpecialty;
-        return matchesSearch && matchesSpecialty;
+      filteredDoctors = allDoctors.where((d) {
+        final matchesQuery = d.name.toLowerCase().contains(query) || d.specialty.toLowerCase().contains(query);
+        final matchesSpec = selectedSpecialty == 'All Specialties' || d.specialty == selectedSpecialty;
+        return matchesQuery && matchesSpec;
       }).toList();
     });
   }
@@ -168,40 +129,28 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: const BottomNavBar(
-        selectedIndex: 1,
-      ), // 0-4 for different pages
+      bottomNavigationBar: const BottomNavBar(selectedIndex: 1),
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'All Doctors',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('All Doctors', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
       body: Column(
         children: [
-          // Search and Filter Section
+          // Search & Filter
           Container(
             color: Colors.white,
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Search Bar
+                // Search
                 Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
                   child: TextField(
                     controller: searchController,
                     decoration: InputDecoration(
@@ -209,43 +158,22 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
                       hintStyle: TextStyle(color: Colors.grey[500]),
                       prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Specialty Filter Dropdown
+                // Specialty filter
                 GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isDropdownOpen = !isDropdownOpen;
-                    });
-                  },
+                  onTap: () => setState(() => isDropdownOpen = !isDropdownOpen),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          selectedSpecialty,
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        Icon(
-                          isDropdownOpen
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          color: Colors.grey[600],
-                        ),
+                        Text(selectedSpecialty, style: const TextStyle(fontSize: 15)),
+                        Icon(isDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.grey[600]),
                       ],
                     ),
                   ),
@@ -254,54 +182,26 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
             ),
           ),
 
-          // Dropdown Menu (when open)
+          // Dropdown
           if (isDropdownOpen)
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4)),
+              ]),
               child: Column(
-                children: specialties.map((specialty) {
-                  bool isSelected = specialty == selectedSpecialty;
+                children: specialties.map((s) {
+                  final selected = s == selectedSpecialty;
                   return InkWell(
-                    onTap: () => _selectSpecialty(specialty),
+                    onTap: () => _selectSpecialty(s),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFFE0F2F1)
-                            : Colors.white,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      color: selected ? const Color(0xFFE0F2F1) : Colors.white,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            specialty,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: isSelected
-                                  ? const Color(0xFF00695C)
-                                  : Colors.black,
-                            ),
-                          ),
-                          if (isSelected)
-                            const Icon(
-                              Icons.check,
-                              color: Color(0xFF00695C),
-                              size: 20,
-                            ),
+                          Text(s, style: TextStyle(fontSize: 15, color: selected ? const Color(0xFF00695C) : Colors.black)),
+                          if (selected) const Icon(Icons.check, color: Color(0xFF00695C), size: 20),
                         ],
                       ),
                     ),
@@ -312,37 +212,23 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
 
           const SizedBox(height: 8),
 
-          // Doctors List
+          // List
           Expanded(
             child: filteredDoctors.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
+                        Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
                         const SizedBox(height: 16),
-                        Text(
-                          'No doctors found',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('No doctors found', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
                       ],
                     ),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: filteredDoctors.length,
-                    itemBuilder: (context, index) {
-                      final doctor = filteredDoctors[index];
-                      return null;
-                      //return _buildDoctorCard(doctor);
-                    },
+                    itemBuilder: (context, i) => _buildDoctorCard(filteredDoctors[i]),
                   ),
           ),
         ],
@@ -350,13 +236,13 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
     );
   }
 
-  /* Widget _buildDoctorCard(Doctor doctor) {
+  Widget _buildDoctorCard(Doctor doctor) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DoctorProfilePage(
+            builder: (_) => DoctorProfilePage(
               doctorId: doctor.id,
               doctorName: doctor.name,
               specialty: doctor.specialty,
@@ -365,86 +251,51 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
               doctorImage: doctor.imageUrl,
             ),
           ),
-        ); 
-      },  
+        );
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
-            // Doctor Image
+            // Image
             Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
               child: doctor.imageUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
                         doctor.imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.person,
-                            size: 32,
-                            color: Colors.grey[400],
-                          );
-                        },
+                        errorBuilder: (_, __, ___) => Icon(Icons.person, size: 32, color: Colors.grey[400]),
                       ),
                     )
-                  : Icon(
-                      Icons.person,
-                      size: 32,
-                      color: Colors.grey[400],
-                    ),
+                  : Icon(Icons.person, size: 32, color: Colors.grey[400]),
             ),
             const SizedBox(width: 12),
-            // Doctor Info
+            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    doctor.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(doctor.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  Text(
-                    doctor.specialty,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                  Text(doctor.specialty, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                 ],
               ),
             ),
-            // Arrow Icon
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey[400],
-            ),
+            // Arrow
+            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
           ],
         ),
       ),
     );
-  } */
+  }
 }

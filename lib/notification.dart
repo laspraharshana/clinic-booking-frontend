@@ -1,5 +1,6 @@
+import 'package:clinic_booking_frontend/patient_profile.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/brand_colors.dart';
+import 'package:clinic_booking_frontend/brand_colors.dart' hide kPrimaryDark, kPrimary;
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});

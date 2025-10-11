@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'Bottom_navbar.dart';
-import 'doctor_list.dart';
+import 'Doctor_list.dart';
 import 'patient_profile.dart';
 import 'visits_page.dart';
 

@@ -1,6 +1,6 @@
 import 'package:clinic_booking_frontend/view/visits_page.dart';
 import 'package:flutter/material.dart';
-import 'doctor_list.dart';
+import 'Doctor_list.dart';
 import 'Bottom_navbar.dart';
 
 class PatientProfilePage extends StatelessWidget {

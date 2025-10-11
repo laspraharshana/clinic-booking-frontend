@@ -3,7 +3,7 @@ import 'book_appoinment.dart';
 import 'package:flutter/material.dart';
 
 class DoctorProfilePage extends StatelessWidget {
-  const DoctorProfilePage({super.key});
+  const DoctorProfilePage({super.key, String? doctorImage});
 
   @override
   Widget build(BuildContext context) {

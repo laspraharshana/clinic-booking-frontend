@@ -1,4 +1,4 @@
-import 'package:clinic_booking_frontend/view/doctor_list.dart';
+import 'package:clinic_booking_frontend/view/Doctor_list.dart';
 import 'package:clinic_booking_frontend/view/patient_profile.dart';
 
 import 'book_appoinment.dart';
