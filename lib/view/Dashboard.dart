@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'doctor_list.dart';
+import 'patient_profile.dart';
 import 'visits_page.dart';
 
 // Dummy Placeholder Page
@@ -58,9 +59,7 @@ class _DashboardState extends State<Dashboard> {
       case 4:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Profile Page"),
-          ),
+          MaterialPageRoute(builder: (_) => const PatientProfilePage()),
         );
         break;
     }
