@@ -206,7 +206,7 @@ class _DashboardScreenState extends State<ReportsAnalyticsPage> {
     bool isPositive,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -224,7 +224,7 @@ class _DashboardScreenState extends State<ReportsAnalyticsPage> {
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 24),
+              Icon(icon, color: color, size: 22),
               const Spacer(),
               Text(
                 change,
@@ -242,12 +242,12 @@ class _DashboardScreenState extends State<ReportsAnalyticsPage> {
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 0),
               Text(
                 title,
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -578,13 +578,13 @@ class _DashboardScreenState extends State<ReportsAnalyticsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
+            Icon(icon, color: color, size: 19),
+            const SizedBox(height: 3),
             Text(
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 10,
                 color: Colors.black87,
                 fontWeight: FontWeight.w500,
               ),
