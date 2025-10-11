@@ -1,6 +1,5 @@
-import 'package:clinic_booking_frontend/view/Doctor_list.dart';
-import 'package:clinic_booking_frontend/view/patient_profile.dart';
-
+import 'Doctor_list.dart';
+import 'patient_profile.dart';
 import 'book_appoinment.dart';
 import 'package:flutter/material.dart';
 import 'Dashboard.dart';

@@ -243,11 +243,11 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
           context,
           MaterialPageRoute(
             builder: (_) => DoctorProfilePage(
-              doctorId: doctor.id,
-              doctorName: doctor.name,
-              specialty: doctor.specialty,
-              rating: doctor.rating,
-              consultationFee: doctor.consultationFee,
+              // doctorId: doctor.id,
+              // doctorName: doctor.name,
+              // specialty: doctor.specialty,
+              // rating: doctor.rating,
+              // consultationFee: doctor.consultationFee,
               doctorImage: doctor.imageUrl,
             ),
           ),

@@ -1,4 +1,4 @@
-import 'package:clinic_booking_frontend/patient_profile.dart';
+import 'patient_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:clinic_booking_frontend/brand_colors.dart' hide kPrimaryDark, kPrimary;
 
