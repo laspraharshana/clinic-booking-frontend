@@ -29,7 +29,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
 
   // void _onBottomNavTapped(int index) {
   //   setState(() => _selectedIndex = index);

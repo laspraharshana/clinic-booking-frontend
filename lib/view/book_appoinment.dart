@@ -334,11 +334,11 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                     "${DateFormat('dd/MM/yyyy').format(selectedDate)} at ${selectedTime ?? 'Time '}",
                   ),
                   const SizedBox(height: 8),
-                  _summaryRow("Consultation Fee", "\Rs. $consultationFee"),
+                  _summaryRow("Consultation Fee", "Rs. $consultationFee"),
                   const SizedBox(height: 8),
-                  _summaryRow("Platform Fee", "\Rs. $platformFee"),
+                  _summaryRow("Platform Fee", "Rs. $platformFee"),
                   const Divider(height: 24),
-                  _summaryRow("Total", "\Rs. $totalAmount", isBold: true),
+                  _summaryRow("Total", "Rs. $totalAmount", isBold: true),
                 ],
               ),
             ),
@@ -375,7 +375,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   elevation: 0,
                 ),
                 child: Text(
-                  "Confirm Booking - \Rs. $totalAmount",
+                  "Confirm Booking - Rs. $totalAmount",
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white,

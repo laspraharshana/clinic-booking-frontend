@@ -81,7 +81,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   const Divider(height: 24),
                   _summaryRow(
                     "Total Amount",
-                    "\Rs. ${widget.totalAmount.toStringAsFixed(0)}",
+                    "Rs. ${widget.totalAmount.toStringAsFixed(0)}",
                     isBold: true,
                   ),
                 ],
@@ -456,7 +456,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   elevation: 0,
                 ),
                 child: Text(
-                  "Pay \Rs. ${widget.totalAmount.toStringAsFixed(0)}",
+                  "Pay Rs. ${widget.totalAmount.toStringAsFixed(0)}",
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white,

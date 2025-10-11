@@ -340,6 +340,7 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
                     itemCount: filteredDoctors.length,
                     itemBuilder: (context, index) {
                       final doctor = filteredDoctors[index];
+                      return null;
                       //return _buildDoctorCard(doctor);
                     },
                   ),
