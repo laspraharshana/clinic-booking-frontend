@@ -3,42 +3,18 @@ import 'admin_navbar.dart';
 // import 'admin_doctors_page.dart';
 // import 'admin_patients_page.dart';
 // import 'admin_appointments_page.dart';
-// import 'admin_reports_page.dart';
+import 'reports_page.dart';
 
-class AdminDashboard extends StatefulWidget {
+class AdminDashboard extends StatelessWidget {
   const AdminDashboard({Key? key}) : super(key: key);
 
-  @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
-}
-
-class _AdminDashboardState extends State<AdminDashboard> {
-  int _currentIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final pages = [
-      _buildDashboardContent(),
-      // const AdminDoctorsPage(),
-      // const AdminAppointmentsPage(),
-      // const AdminReportsPage(),
-      const Center(child: Text("Settings Page")),
-    ];
-
-    return Scaffold(
-      body: SafeArea(child: pages[_currentIndex]),
-      bottomNavigationBar: AdminNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-        },
-      ),
-    );
-  }
-
   // -------------------- DASHBOARD CONTENT --------------------
-  Widget _buildDashboardContent() {
+  @override
+  Widget build(BuildContext) {
     return Scaffold(
+      bottomNavigationBar: const ABottomNavBar(
+        selectedIndex: 0,
+      ), // 0-4 for different pages
       body: CustomScrollView(
         slivers: [
           // Header
@@ -106,10 +82,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(255, 18, 151, 109),
-            Color.fromARGB(255, 16, 72, 67),
-          ],
+          colors: [const Color(0xFF008B8B), Color.fromARGB(255, 16, 72, 67)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

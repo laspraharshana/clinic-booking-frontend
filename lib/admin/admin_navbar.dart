@@ -1,73 +1,120 @@
 import 'package:flutter/material.dart';
+import 'admin_dashbord.dart';
+import 'reports_page.dart';
 
-class AdminNavBar extends StatelessWidget {
-  final int currentIndex;
-  final Function(int) onTap;
+class ABottomNavBar extends StatelessWidget {
+  final int selectedIndex;
 
-  const AdminNavBar({Key? key, required this.currentIndex, required this.onTap})
-    : super(key: key);
+  const ABottomNavBar({super.key, required this.selectedIndex});
+
+  void _onBottomNavTapped(BuildContext context, int index) {
+    // Don't navigate if already on the selected page
+    if (index == selectedIndex) return;
+
+    Widget page;
+    switch (index) {
+      case 0:
+        page = const AdminDashboard();
+        break;
+      // case 1:
+      //   page = const AllDoctorsPage();
+      //   break;
+      // case 2:
+      //   page = const PlaceholderPage(title: "Add New Page");
+      //   break;
+      case 3:
+        page = const AdminReportsPage();
+        break;
+      // case 4:
+      //    page = const PatientProfilePage();
+      //   break;
+      //  case 5:
+      //    page = const AdminSetting();
+      //   break;
+      default:
+        return;
+    }
+
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      {'icon': Icons.dashboard_outlined, 'label': 'Dashboard'},
-      {'icon': Icons.people_outline, 'label': 'Doctors'},
-      {'icon': Icons.calendar_today_outlined, 'label': 'Appointments'},
-      {'icon': Icons.bar_chart_outlined, 'label': 'Reports'},
-      {'icon': Icons.settings_outlined, 'label': 'Settings'},
-    ];
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
+            color: Colors.black12.withOpacity(0.1),
+            blurRadius: 6,
             offset: const Offset(0, -2),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(items.length, (index) {
-          final isActive = currentIndex == index;
-          final color = isActive ? const Color(0xFF0D7377) : Colors.grey;
+        children: [
+          _buildNavItem(context, Icons.dashboard_outlined, "Dashbord", 0),
+          _buildNavItem(context, Icons.people_outline, "Doctors", 1),
+          _buildNavItem(
+            context,
+            Icons.calendar_today_outlined,
+            "Appoinments",
+            2,
+          ),
+          _buildNavItem(context, Icons.bar_chart_outlined, "Reports", 3),
+          _buildNavItem(context, Icons.settings_outlined, "Settings", 4),
+        ],
+      ),
+    );
+  }
 
-          return GestureDetector(
-            onTap: () => onTap(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isActive ? const Color(0xFFE0F7FA) : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    items[index]['icon'] as IconData,
-                    color: color,
-                    size: 28,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    items[index]['label'] as String,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: isActive
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: color,
-                    ),
-                  ),
-                ],
+  Widget _buildNavItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    int index,
+  ) {
+    final bool isSelected = selectedIndex == index;
+    return GestureDetector(
+      onTap: () => _onBottomNavTapped(context, index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+        decoration: isSelected
+            ? BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(20),
+              )
+            : null,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
               ),
             ),
-          );
-        }),
+            const SizedBox(height: 4),
+            if (isSelected)
+              Container(
+                width: 5,
+                height: 5,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF1B5E57),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
