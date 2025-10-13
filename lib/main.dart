@@ -1,10 +1,8 @@
 import 'package:clinic_booking_frontend/view/Dashboard.dart';
 import 'package:clinic_booking_frontend/view/Signinandsignup.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

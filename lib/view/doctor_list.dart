@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../core/network/dio_client.dart';
+import 'Bottom_navbar.dart';
 import 'doctor_profile.dart';
 import 'Dashboard.dart';
 import 'visits_page.dart';

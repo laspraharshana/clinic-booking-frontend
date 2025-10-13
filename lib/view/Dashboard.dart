@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'Bottom_navbar.dart';
+import 'Doctor_list.dart';
+import 'patient_profile.dart';
 import 'visits_page.dart';
-import 'doctor_list.dart';
+import 'Doctor_list.dart';
 
 class PlaceholderPage extends StatelessWidget {
   final String title;
