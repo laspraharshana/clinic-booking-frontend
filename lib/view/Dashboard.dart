@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'doctor_list.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'visits_page.dart';
+import 'doctor_list.dart';
 
-// Dummy Placeholder Page
 class PlaceholderPage extends StatelessWidget {
   final String title;
   const PlaceholderPage({super.key, required this.title});
@@ -10,10 +11,7 @@ class PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: const Color(0xFF1B5E57),
-      ),
+      appBar: AppBar(title: Text(title), backgroundColor: const Color(0xFF1B5E57)),
       body: Center(child: Text(title, style: const TextStyle(fontSize: 22))),
     );
   }
@@ -29,39 +27,57 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int _selectedIndex = 0;
 
+  String _displayName = 'User';
+  StreamSubscription<User?>? _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _setName(FirebaseAuth.instance.currentUser);
+    _authSub = FirebaseAuth.instance.userChanges().listen((u) => _setName(u));
+  }
+
+  void _setName(User? u) {
+    String name = 'User';
+    if (u != null) {
+      final dn = u.displayName?.trim();
+      if (dn != null && dn.isNotEmpty) {
+        name = _titleCase(dn);
+      } else if ((u.email ?? '').isNotEmpty) {
+        final local = u.email!.split('@').first;
+        final parts = local.split(RegExp(r'[._-]+')).where((s) => s.isNotEmpty);
+        name = parts.map(_titleCase).join(' ');
+        if (name.isEmpty) name = 'User';
+      }
+    }
+    if (mounted) setState(() => _displayName = name);
+  }
+
+  String _titleCase(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + (s.length > 1 ? s.substring(1) : '');
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
+
   void _onBottomNavTapped(int index) {
     setState(() => _selectedIndex = index);
-
     switch (index) {
       case 0:
-        break; // Home - stay here
+        break; // Home - stay
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AllDoctorsPage()),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AllDoctorsPage()));
         break;
       case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Add New Page"),
-          ),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderPage(title: "Add New Page")));
         break;
       case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const VisitsPage()),
-        );
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const VisitsPage()));
         break;
       case 4:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PlaceholderPage(title: "Profile Page"),
-          ),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderPage(title: "Profile Page")));
         break;
     }
   }
@@ -71,18 +87,11 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
 
-      // ✅ Custom Bottom Navigation
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black12.withOpacity(0.1), blurRadius: 6, offset: const Offset(0, -2))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -100,7 +109,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // === Dashboard ===
   Widget _buildDashboardBody() {
     return SingleChildScrollView(
       child: Column(
@@ -137,51 +145,35 @@ class _DashboardState extends State<Dashboard> {
                         const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              "Good Afternoon",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            Text(
-                              "Sarah",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                          children: [
+                            const Text("Good Afternoon",
+                                style: TextStyle(fontSize: 14, color: Colors.white70)),
+                            Text(_displayName,
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white)),
                           ],
                         ),
                       ],
                     ),
-                    const Icon(
-                      Icons.notifications_none,
-                      size: 28,
-                      color: Colors.white,
-                    ),
+                    const Icon(Icons.notifications_none, size: 28, color: Colors.white),
                   ],
                 ),
                 const SizedBox(height: 20),
 
-                // Search
+                // Search → open Find
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: const Offset(0, 3))],
                   ),
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    readOnly: true,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AllDoctorsPage())),
+                    decoration: const InputDecoration(
                       icon: Icon(Icons.search),
                       hintText: "Search doctors, symptoms, specialties...",
                       border: InputBorder.none,
@@ -200,23 +192,9 @@ class _DashboardState extends State<Dashboard> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Expanded(
-                  child: _buildStatCard(
-                    "Upcoming",
-                    "0",
-                    Icons.calendar_today,
-                    Colors.green,
-                  ),
-                ),
+                Expanded(child: _buildStatCard("Upcoming", "0", Icons.calendar_today, Colors.green)),
                 const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    "Completed",
-                    "0",
-                    Icons.check_circle,
-                    Colors.teal,
-                  ),
-                ),
+                Expanded(child: _buildStatCard("Completed", "0", Icons.check_circle, Colors.teal)),
               ],
             ),
           ),
@@ -226,10 +204,7 @@ class _DashboardState extends State<Dashboard> {
           // Specialties Section
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "Medical Specialties",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            child: Text("Medical Specialties", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(height: 15),
 
@@ -242,54 +217,12 @@ class _DashboardState extends State<Dashboard> {
               mainAxisSpacing: 16,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                _buildSpecialtyCard(
-                  context,
-                  "Cardiology",
-                  "24 doctors",
-                  Icons.favorite,
-                  Colors.red,
-                  const PlaceholderPage(title: "Cardiology"),
-                ),
-                _buildSpecialtyCard(
-                  context,
-                  "Neurology",
-                  "18 doctors",
-                  Icons.psychology,
-                  Colors.purple,
-                  const PlaceholderPage(title: "Neurology"),
-                ),
-                _buildSpecialtyCard(
-                  context,
-                  "Pediatrics",
-                  "32 doctors",
-                  Icons.child_care,
-                  Colors.pink,
-                  const PlaceholderPage(title: "Pediatrics"),
-                ),
-                _buildSpecialtyCard(
-                  context,
-                  "Eye Care",
-                  "15 doctors",
-                  Icons.remove_red_eye,
-                  Colors.blue,
-                  const PlaceholderPage(title: "Eye Care"),
-                ),
-                _buildSpecialtyCard(
-                  context,
-                  "Orthopedics",
-                  "28 doctors",
-                  Icons.fitness_center,
-                  Colors.orange,
-                  const PlaceholderPage(title: "Orthopedics"),
-                ),
-                _buildSpecialtyCard(
-                  context,
-                  "General",
-                  "45 doctors",
-                  Icons.medical_services,
-                  Colors.teal,
-                  const PlaceholderPage(title: "General"),
-                ),
+                _buildSpecialtyCard(context, "Cardiology", "24 doctors", Icons.favorite, Colors.red, const AllDoctorsPage(initialSpecialty: "Cardiology")),
+                _buildSpecialtyCard(context, "Neurology", "18 doctors", Icons.psychology, Colors.purple, const AllDoctorsPage(initialSpecialty: "Neurology")),
+                _buildSpecialtyCard(context, "Pediatrics", "32 doctors", Icons.child_care, Colors.pink, const AllDoctorsPage(initialSpecialty: "Pediatrics")),
+                _buildSpecialtyCard(context, "Eye Care", "15 doctors", Icons.remove_red_eye, Colors.blue, const AllDoctorsPage(initialSpecialty: "Eye Care")),
+                _buildSpecialtyCard(context, "Orthopedics", "28 doctors", Icons.fitness_center, Colors.orange, const AllDoctorsPage(initialSpecialty: "Orthopedics")),
+                _buildSpecialtyCard(context, "General", "45 doctors", Icons.medical_services, Colors.teal, const AllDoctorsPage(initialSpecialty: "General")),
               ],
             ),
           ),
@@ -300,45 +233,21 @@ class _DashboardState extends State<Dashboard> {
   }
 
   // === Helpers ===
-
   Widget _buildNavItem(IconData icon, String label, int index) {
-    bool isSelected = _selectedIndex == index;
+    final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () => _onBottomNavTapped(index),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(20),
-              )
-            : null,
+        decoration: isSelected ? BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(20)) : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
-            ),
+            Icon(icon, color: isSelected ? const Color(0xFF1B5E57) : Colors.grey),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
-              ),
-            ),
+            Text(label, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, color: isSelected ? const Color(0xFF1B5E57) : Colors.grey)),
             const SizedBox(height: 4),
-            if (isSelected)
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF1B5E57),
-                ),
-              ),
+            if (isSelected) Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF1B5E57))),
           ],
         ),
       ),
@@ -350,42 +259,21 @@ class _DashboardState extends State<Dashboard> {
       onTap: () => _onBottomNavTapped(index),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1B5E57),
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(color: const Color(0xFF1B5E57), borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black12.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))]),
       child: Column(
         children: [
           Icon(icon, size: 30, color: color),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(title, style: const TextStyle(color: Colors.black54)),
         ],
@@ -393,48 +281,19 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget _buildSpecialtyCard(
-    BuildContext context,
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-    Widget page,
-  ) {
+  Widget _buildSpecialtyCard(BuildContext context, String title, String subtitle, IconData icon, Color color, Widget page) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-      },
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => page)),
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black12.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))]),
         padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: color.withOpacity(0.15),
-              child: Icon(icon, size: 26, color: color),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 4),
-            Text(subtitle, style: const TextStyle(color: Colors.black54)),
-          ],
-        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          CircleAvatar(radius: 28, backgroundColor: color.withOpacity(0.15), child: Icon(icon, size: 26, color: color)),
+          const SizedBox(height: 12),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 4),
+          Text(subtitle, style: const TextStyle(color: Colors.black54)),
+        ]),
       ),
     );
   }

@@ -304,7 +304,7 @@ class _VisitsPageState extends State<VisitsPage>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const BookAppointmentPage(),
+                        builder: (context) => const BookAppointmentPage(doctorId: '', doctorName: '',),
                       ),
                     );
                   },

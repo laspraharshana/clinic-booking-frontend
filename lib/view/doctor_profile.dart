@@ -1,429 +1,367 @@
-import 'Dashboard.dart';
-import 'book_appoinment.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 
-class DoctorProfilePage extends StatelessWidget {
-  const DoctorProfilePage({super.key});
+// Use your shared Dio (adds Authorization if signed in)
+import '../core/network/dio_client.dart';
+
+// Keep your existing file name for Book page import
+import 'book_appoinment.dart'; // if your file is book_appointment.dart, update this import
+
+// Optional preview entrypoint (safe to keep)
+void main() {
+  runApp(const DoctorProfileApp());
+}
+
+class DoctorProfileApp extends StatelessWidget {
+  const DoctorProfileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const DoctorProfilePage(
+        doctorId: 'dr_sarah',
+        doctorName: 'Dr. Sarah Johnson',
+        specialty: 'Cardiology',
+        clinicName: 'City General Hospital',
+      ),
+    );
+  }
+}
+
+class DoctorProfilePage extends StatefulWidget {
+  const DoctorProfilePage({
+    super.key,
+    required this.doctorId,
+    required this.doctorName,
+    required this.specialty,
+    this.clinicName,
+  });
+
+  final String doctorId;
+  final String doctorName;
+  final String specialty;
+  final String? clinicName;
+
+  @override
+  State<DoctorProfilePage> createState() => _DoctorProfilePageState();
+}
+
+class _DoctorProfilePageState extends State<DoctorProfilePage> {
+  late final Dio _dio;
+
+  bool _loading = true;
+  String? _error;
+
+  // Data from backend
+  String? _name;
+  String? _specialty;
+  String? _clinicName;
+  String? _address;
+  String? _bio;
+  int? _yearsExp;
+  int? _patientsCount;
+  double? _rating;
+  int? _consultationFee; // LKR
+  String? _photoUrl;
+  int? _nextAvailableStartUtc;
+  int? _reviewsCount; // only shown if backend provides it
+
+  @override
+  void initState() {
+    super.initState();
+    _dio = createDio();
+    _fetchProfile();
+  }
+
+  Future<void> _fetchProfile() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final res = await _dio.get('/v1/doctors/${widget.doctorId}');
+      final data = Map<String, dynamic>.from(res.data['data'] as Map);
+
+      setState(() {
+        _name = (data['name'] as String?) ?? widget.doctorName;
+        _specialty = (data['specialty'] as String?) ?? widget.specialty;
+        _clinicName = (data['clinicName'] as String?) ?? widget.clinicName;
+        _address = data['address'] as String?;
+        _bio = data['bio'] as String?;
+        _yearsExp = (data['yearsExp'] as num?)?.toInt();
+        _patientsCount = (data['patientsCount'] as num?)?.toInt();
+        _rating = (data['rating'] as num?)?.toDouble();
+        _consultationFee = (data['consultationFee'] as num?)?.toInt();
+        _photoUrl = data['photoUrl'] as String?;
+        _nextAvailableStartUtc = (data['nextAvailableStartUtc'] as num?)?.toInt();
+        _reviewsCount = (data['reviewsCount'] as num?)?.toInt(); // if not present, stays null
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loading = false;
+        _error = 'Failed to load profile';
+      });
+    }
+  }
+
+  String _formatNext(int? ms) {
+    if (ms == null) return 'No upcoming slots';
+    final dt = DateTime.fromMillisecondsSinceEpoch(ms).toLocal();
+    final now = DateTime.now();
+    final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+    final two = (int n) => n.toString().padLeft(2, '0');
+    final h12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    final time = '$h12:${two(dt.minute)} $ampm';
+    if (isToday) return 'Today $time';
+    return '${dt.month}/${dt.day}/${dt.year} $time';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Doctor'),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_error!, style: const TextStyle(color: Colors.red)),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _fetchProfile,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final name = _name ?? widget.doctorName;
+    final specialty = _specialty ?? widget.specialty;
+    final clinicName = _clinicName ?? widget.clinicName ?? '';
+    final bio = _bio ?? '—';
+    final yearsExp = _yearsExp?.toString() ?? '—';
+    final patients = _patientsCount?.toString() ?? '—';
+    final rating = _rating != null ? _rating!.toStringAsFixed(1) : '—';
+    final fee = _consultationFee != null ? 'LKR ${_consultationFee!.toStringAsFixed(0)}' : '—';
+    final nextAvail = _formatNext(_nextAvailableStartUtc);
+    final available = _nextAvailableStartUtc != null;
+
+    final ImageProvider avatar = (_photoUrl != null && _photoUrl!.isNotEmpty)
+        ? NetworkImage(_photoUrl!)
+        : const AssetImage('assets/doctor.jpg');
+
+    final reviewsText = (_reviewsCount != null) ? ' ($_reviewsCount reviews)' : '';
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header with Doctor Info
-            Container(
-              padding: const EdgeInsets.fromLTRB(26, 10, 16, 24),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF00695C), Color.fromARGB(255, 12, 68, 62)],
+      backgroundColor: Colors.grey[100],
+      body: RefreshIndicator(
+        onRefresh: _fetchProfile,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF00695C),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                  ),
                 ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-              ),
-
-              child: Column(
-                children: [
-                  // Back button and icons row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Dashboard(),
-                            ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.more_vert, color: Colors.white),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Doctor Image and Info
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white, width: 3),
-                          image: const DecorationImage(
-                            image: AssetImage("assets/doctor.jpg"),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Dr. Sarah Johnson",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              "Cardiology",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: const [
-                                Icon(Icons.star, color: Colors.amber, size: 16),
-                                SizedBox(width: 4),
-                                Text(
-                                  "4.9 (124 reviews)",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.lightGreenAccent,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Color(0xFF00695C),
-                                    size: 14,
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    "Available",
-                                    style: TextStyle(
-                                      color: Color(0xFF00695C),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Stats Row
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _statCard(Icons.work_outline, "15+", "Years Exp"),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _statCard(Icons.people_outline, "500+", "Patients"),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _statCard(Icons.star_outline, "4.9", "Rating"),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // About Section
-            _buildSection(
-              title: "About",
-              child: const Text(
-                "Experienced cardiologist with 15+ years in cardiac care and interventional procedures.",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-            ),
-
-            // Location Section
-            _buildSection(
-              title: "Location",
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: const [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 18,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          "City General Hospital",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 26),
-                    child: Text(
-                      "123 Medical Center Dr, Suite 200",
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    CircleAvatar(radius: 40, backgroundImage: avatar),
+                    const SizedBox(height: 12),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Map placeholder
-                  Container(
-                    height: 140,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
+                    Text(
+                      specialty,
+                      style: const TextStyle(color: Colors.white70, fontSize: 16),
                     ),
-                    child: Stack(
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.map_outlined,
-                                size: 40,
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                "Interactive map",
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
+                        const Icon(Icons.star, color: Colors.amber, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          (rating == '—') ? '—' : '$rating$reviewsText',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          available ? Icons.check_circle : Icons.cancel,
+                          color: available ? Colors.lightGreenAccent : Colors.redAccent,
+                        ),
+                        Text(
+                          available ? ' Available' : ' Unavailable',
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Get Directions Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: Color(0xFF00695C),
-                          width: 1.5,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text(
-                        "Get Directions",
-                        style: TextStyle(
-                          color: Color(0xFF00695C),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            // Availability & Pricing Section
-            _buildSection(
-              title: "Availability & Pricing",
-              child: Column(
-                children: [
-                  _infoRow(
-                    Icons.access_time_outlined,
-                    "Next Available",
-                    "Today 2:30 PM",
-                  ),
-                  const SizedBox(height: 12),
-                  _infoRow(Icons.attach_money, "Consultation Fee", "\$150"),
-                ],
+              const SizedBox(height: 16),
+
+              // Experience / Patients / Rating Row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _infoCard(yearsExp == '—' ? '—' : '$yearsExp+', 'Years Exp', Icons.work),
+                    _infoCard(patients, 'Patients', Icons.people),
+                    _infoCard(rating, 'Rating', Icons.star),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-            // Book Appointment Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: () {
+              // About
+              _sectionCard('About', bio),
+
+              // Location
+              _sectionCard('Location', '',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        clinicName.isNotEmpty
+                            ? clinicName + (_address != null && _address!.isNotEmpty ? '\n$_address' : '')
+                            : (_address ?? '—'),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        height: 120,
+                        color: Colors.grey[200],
+                        child: const Center(
+                            child: Text('Interactive map', style: TextStyle(color: Colors.grey))),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.teal),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Get Directions', style: TextStyle(color: Colors.teal)),
+                      ),
+                    ],
+                  )),
+
+              // Availability & Pricing
+              _sectionCard('Availability & Pricing', '',
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.access_time, color: Colors.teal),
+                        title: const Text('Next Available'),
+                        trailing: Text(nextAvail),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.attach_money, color: Colors.teal),
+                        title: const Text('Consultation Fee'),
+                        trailing: Text(fee),
+                      ),
+                    ],
+                  )),
+
+              const SizedBox(height: 20),
+
+              // Book Appointment Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ElevatedButton(
+                  onPressed: available
+                      ? () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const BookAppointmentPage(),
+                        builder: (_) => BookAppointmentPage(
+                          doctorId: widget.doctorId,
+                          doctorName: name,
+                          specialty: specialty,
+                          clinicName: clinicName,
+                        ),
                       ),
                     );
-                  },
-                  icon: const Icon(Icons.calendar_today, size: 18),
-                  label: const Text(
-                    "Book Appointment",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+                  }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00695C),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
+                    disabledBackgroundColor: Colors.grey[300],
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Center(
+                    child: Text('Book Appointment', style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 30),
-          ],
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _statCard(IconData icon, String value, String label) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: const Color(0xFF00695C), size: 24),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-        ],
-      ),
+  // Info card widget
+  Widget _infoCard(String value, String label, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.teal, size: 28),
+        const SizedBox(height: 6),
+        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(label, style: const TextStyle(color: Colors.grey)),
+      ],
     );
   }
 
-  Widget _buildSection({required String title, required Widget child}) {
+  // Section card widget
+  Widget _sectionCard(String title, String description, {Widget? child}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 3))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 12),
-          child,
+          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          if (description.isNotEmpty) Text(description, style: const TextStyle(fontSize: 14)),
+          if (child != null) child,
         ],
       ),
-    );
-  }
-
-  Widget _infoRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF00695C).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 20, color: const Color(0xFF00695C)),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-      ],
     );
   }
 }
