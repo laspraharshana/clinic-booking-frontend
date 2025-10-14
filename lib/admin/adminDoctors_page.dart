@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'admin_navbar.dart';
+
 // Brand colors
 const kPrimaryDark = Color(0xFF1B5E57);
 const kPrimary = Color(0xFF00695C);
@@ -21,12 +23,14 @@ class _ManageDoctorsPageState extends State<ManageDoctorsPage> {
   List<Doctor> get _filtered {
     final q = _searchCtrl.text.trim().toLowerCase();
     return _doctors.where((d) {
-      final matchesQuery = q.isEmpty ||
+      final matchesQuery =
+          q.isEmpty ||
           d.name.toLowerCase().contains(q) ||
           d.specialty.toLowerCase().contains(q) ||
           (d.hospital?.toLowerCase().contains(q) ?? false);
 
-      final matchesFilter = _filterIndex == 0 ||
+      final matchesFilter =
+          _filterIndex == 0 ||
           (_filterIndex == 1 && d.active) ||
           (_filterIndex == 2 && !d.active);
 
@@ -41,6 +45,9 @@ class _ManageDoctorsPageState extends State<ManageDoctorsPage> {
   }
 
   void _onAddNewDoctor() {
+    // bottomNavigationBar: const ABottomNavBar(
+    //     selectedIndex: 1,
+    //   );// 0-4 for differ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         backgroundColor: kPrimaryDark,
@@ -90,20 +97,29 @@ class _ManageDoctorsPageState extends State<ManageDoctorsPage> {
     final list = _filtered;
 
     return Scaffold(
+      bottomNavigationBar: const ABottomNavBar(
+        selectedIndex: 1,
+      ), // 0-4 for differ
       backgroundColor: Colors.grey[50],
-      bottomNavigationBar: _BottomNavBar(
-        selectedIndex: 1, // Doctors tab highlighted on this page
-        onTap: (index) {
-          // TODO: replace with your own routing
-          final label = ['Dashboard', 'Doctors', 'Appointments', 'Reports', 'Settings'][index];
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: kPrimaryDark,
-              content: Text('$label tapped (wire up navigation)'),
-            ),
-          );
-        },
-      ),
+      // bottomNavigationBar: _BottomNavBar(
+      //   selectedIndex: 1, // Doctors tab highlighted on this page
+      //   onTap: (index) {
+      //     // TODO: replace with your own routing
+      //     final label = [
+      //       'Dashboard',
+      //       'Doctors',
+      //       'Appointments',
+      //       'Reports',
+      //       'Settings',
+      //     ][index];
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(
+      //         backgroundColor: kPrimaryDark,
+      //         content: Text('$label tapped (wire up navigation)'),
+      //       ),
+      //     );
+      //   },
+      // ),
       body: Column(
         children: [
           _header(context),
@@ -228,7 +244,10 @@ class _ManageDoctorsPageState extends State<ManageDoctorsPage> {
                       ),
                     ),
                     SizedBox(height: 2),
-                    Text('Manage all doctors', style: TextStyle(color: Colors.white70)),
+                    Text(
+                      'Manage all doctors',
+                      style: TextStyle(color: Colors.white70),
+                    ),
                   ],
                 ),
               ),
@@ -257,7 +276,10 @@ class _ManageDoctorsPageState extends State<ManageDoctorsPage> {
                 hintStyle: TextStyle(color: Colors.grey[500]),
                 prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
               ),
             ),
           ),
@@ -355,7 +377,8 @@ class _DoctorCard extends StatelessWidget {
                       ? Image.network(
                           doctor.photoUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _avatarFallback(doctor.name),
+                          errorBuilder: (_, __, ___) =>
+                              _avatarFallback(doctor.name),
                         )
                       : _avatarFallback(doctor.name),
                 ),
@@ -366,20 +389,50 @@ class _DoctorCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(doctor.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    Text(
+                      doctor.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(doctor.specialty, style: const TextStyle(color: Colors.black87, fontSize: 13)),
+                    Text(
+                      doctor.specialty,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 13,
+                      ),
+                    ),
                     if (doctor.hospital != null) ...[
                       const SizedBox(height: 2),
-                      Text(doctor.hospital!, style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                      Text(
+                        doctor.hospital!,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Text('${doctor.patients} patients', style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                        Text(
+                          '${doctor.patients} patients',
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 12,
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         const Icon(Icons.star, color: Colors.amber, size: 16),
-                        Text(doctor.rating.toStringAsFixed(1), style: const TextStyle(color: Colors.black87, fontSize: 12)),
+                        Text(
+                          doctor.rating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 12,
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         _StatusDot(active: doctor.active),
                       ],
@@ -410,10 +463,18 @@ class _DoctorCard extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: onEdit,
                     icon: const Icon(Icons.edit, size: 18, color: Colors.white),
-                    label: const Text('Edit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                    label: const Text(
+                      'Edit',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kPrimaryDark,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
                     ),
                   ),
                 ),
@@ -425,10 +486,18 @@ class _DoctorCard extends StatelessWidget {
                   child: TextButton.icon(
                     onPressed: onDelete,
                     icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-                    label: const Text('Delete', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700)),
+                    label: const Text(
+                      'Delete',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     style: TextButton.styleFrom(
                       backgroundColor: const Color(0xFFFFEEEE),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
                     ),
                   ),
                 ),
@@ -447,10 +516,13 @@ class _DoctorCard extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initials,
-        style: const TextStyle(color: kPrimaryDark, fontWeight: FontWeight.w800),
+        style: const TextStyle(
+          color: kPrimaryDark,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
-    }
+  }
 
   String _toInitials(String name) {
     final parts = name.trim().split(RegExp(r'\s+'));
@@ -469,9 +541,20 @@ class _StatusDot extends StatelessWidget {
     final color = active ? const Color(0xFF2E7D32) : Colors.redAccent;
     return Row(
       children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 4),
-        Text(active ? 'active' : 'inactive', style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(
+          active ? 'active' : 'inactive',
+          style: TextStyle(
+            color: color,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
@@ -516,103 +599,106 @@ class _FilterChip extends StatelessWidget {
 }
 
 // ===================== Bottom Navigation (clean, aligned) =====================
-class _BottomNavBar extends StatelessWidget {
-  final int selectedIndex; // 0..4
-  final ValueChanged<int>? onTap;
+// class _BottomNavBar extends StatelessWidget {
+//   final int selectedIndex; // 0..4
+//   final ValueChanged<int>? onTap;
 
-  const _BottomNavBar({
-    required this.selectedIndex,
-    this.onTap,
-  });
+//   const _BottomNavBar({required this.selectedIndex, this.onTap});
 
-  @override
-  Widget build(BuildContext context) {
-    final items = <_NavItemData>[
-      _NavItemData(icon: Icons.dashboard_outlined, label: 'Dashboard'),
-      _NavItemData(icon: Icons.groups_outlined, label: 'Doctors'),
-      _NavItemData(icon: Icons.calendar_month_outlined, label: 'Appointments'),
-      _NavItemData(icon: Icons.bar_chart_outlined, label: 'Reports'),
-      _NavItemData(icon: Icons.settings_outlined, label: 'Settings'),
-    ];
+//   @override
+//   Widget build(BuildContext context) {
+//     final items = <_NavItemData>[
+//       _NavItemData(icon: Icons.dashboard_outlined, label: 'Dashboard'),
+//       _NavItemData(icon: Icons.groups_outlined, label: 'Doctors'),
+//       _NavItemData(icon: Icons.calendar_month_outlined, label: 'Appointments'),
+//       _NavItemData(icon: Icons.bar_chart_outlined, label: 'Reports'),
+//       _NavItemData(icon: Icons.settings_outlined, label: 'Settings'),
+//     ];
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2))],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(items.length, (i) {
-            final data = items[i];
-            final selected = i == selectedIndex;
-            return Expanded(
-              child: _NavItem(
-                data: data,
-                selected: selected,
-                onTap: () => onTap?.call(i),
-              ),
-            );
-          }),
-        ),
-      ),
-    );
-  }
-}
+//     return SafeArea(
+//       top: false,
+//       child: Container(
+//         height: 72,
+//         padding: const EdgeInsets.symmetric(horizontal: 8),
+//         decoration: const BoxDecoration(
+//           color: Colors.white,
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black12,
+//               blurRadius: 8,
+//               offset: Offset(0, -2),
+//             ),
+//           ],
+//         ),
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: List.generate(items.length, (i) {
+//             final data = items[i];
+//             final selected = i == selectedIndex;
+//             return Expanded(
+//               child: _NavItem(
+//                 data: data,
+//                 selected: selected,
+//                 onTap: () => onTap?.call(i),
+//               ),
+//             );
+//           }),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-class _NavItemData {
-  final IconData icon;
-  final String label;
-  const _NavItemData({required this.icon, required this.label});
-}
+// class _NavItemData {
+//   final IconData icon;
+//   final String label;
+//   const _NavItemData({required this.icon, required this.label});
+// }
 
-class _NavItem extends StatelessWidget {
-  final _NavItemData data;
-  final bool selected;
-  final VoidCallback onTap;
+// class _NavItem extends StatelessWidget {
+//   final _NavItemData data;
+//   final bool selected;
+//   final VoidCallback onTap;
 
-  const _NavItem({
-    required this.data,
-    required this.selected,
-    required this.onTap,
-  });
+//   const _NavItem({
+//     required this.data,
+//     required this.selected,
+//     required this.onTap,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    const selectedBg = Color(0xFFE6F3F2); // soft teal pill behind icon
-    final iconColor = selected ? kPrimaryDark : Colors.grey[500];
-    final labelColor = selected ? kPrimaryDark : Colors.grey[600];
+//   @override
+//   Widget build(BuildContext context) {
+//     const selectedBg = Color(0xFFE6F3F2); // soft teal pill behind icon
+//     final iconColor = selected ? kPrimaryDark : Colors.grey[500];
+//     final labelColor = selected ? kPrimaryDark : Colors.grey[600];
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // vertical alignment
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: selected ? selectedBg : Colors.transparent,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(data.icon, color: iconColor, size: 26),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            data.label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: labelColor,
-              height: 1.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//     return InkWell(
+//       onTap: onTap,
+//       borderRadius: BorderRadius.circular(16),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center, // vertical alignment
+//         children: [
+//           Container(
+//             padding: const EdgeInsets.all(8),
+//             decoration: BoxDecoration(
+//               color: selected ? selectedBg : Colors.transparent,
+//               borderRadius: BorderRadius.circular(14),
+//             ),
+//             child: Icon(data.icon, color: iconColor, size: 26),
+//           ),
+//           const SizedBox(height: 4),
+//           Text(
+//             data.label,
+//             textAlign: TextAlign.center,
+//             style: TextStyle(
+//               fontSize: 12,
+//               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+//               color: labelColor,
+//               height: 1.2,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

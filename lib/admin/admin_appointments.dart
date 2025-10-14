@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'admin_navbar.dart';
+
 // Brand colors
 const kPrimaryDark = Color(0xFF1B5E57);
 const kPrimary = Color(0xFF00695C);
@@ -16,10 +18,19 @@ class _AdminAppointmentsPageState extends State<AdminAppointmentsPage> {
   final TextEditingController _searchCtrl = TextEditingController();
   int _tabIndex = 0; // 0=All, 1=Today, 2=Upcoming
 
-  final List<Appointment> _appointments = []..addAll(() {
+  final List<Appointment> _appointments = []
+    ..addAll(() {
       final now = DateTime.now();
-      final d1 = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
-      final d2 = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+      final d1 = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).add(const Duration(days: 1));
+      final d2 = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).add(const Duration(days: 1));
       return [
         Appointment(
           patientName: 'Sarah Johnson',
@@ -52,21 +63,24 @@ class _AdminAppointmentsPageState extends State<AdminAppointmentsPage> {
     return _appointments.where((a) => _isSameDay(a.dateTime, now)).length;
   }
 
-  int get _confirmedCount =>
-      _appointments.where((a) => a.status == AppointmentStatus.confirmed).length;
+  int get _confirmedCount => _appointments
+      .where((a) => a.status == AppointmentStatus.confirmed)
+      .length;
 
   int get _pendingCount =>
       _appointments.where((a) => a.status == AppointmentStatus.pending).length;
 
-  int get _cancelledCount =>
-      _appointments.where((a) => a.status == AppointmentStatus.cancelled).length;
+  int get _cancelledCount => _appointments
+      .where((a) => a.status == AppointmentStatus.cancelled)
+      .length;
 
   List<Appointment> get _visible {
     final q = _searchCtrl.text.trim().toLowerCase();
     final now = DateTime.now();
 
     return _appointments.where((a) {
-      final matchesQuery = q.isEmpty ||
+      final matchesQuery =
+          q.isEmpty ||
           a.patientName.toLowerCase().contains(q) ||
           a.doctorName.toLowerCase().contains(q) ||
           a.specialty.toLowerCase().contains(q) ||
@@ -76,14 +90,17 @@ class _AdminAppointmentsPageState extends State<AdminAppointmentsPage> {
       if (_tabIndex == 1) {
         matchesTab = _isSameDay(a.dateTime, now);
       } else if (_tabIndex == 2) {
-        final aDay = DateTime(a.dateTime.year, a.dateTime.month, a.dateTime.day);
+        final aDay = DateTime(
+          a.dateTime.year,
+          a.dateTime.month,
+          a.dateTime.day,
+        );
         final today = DateTime(now.year, now.month, now.day);
         matchesTab = aDay.isAfter(today);
       }
 
       return matchesQuery && matchesTab;
-    }).toList()
-      ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    }).toList()..sort((a, b) => a.dateTime.compareTo(b.dateTime));
   }
 
   bool _isSameDay(DateTime a, DateTime b) =>
@@ -94,6 +111,9 @@ class _AdminAppointmentsPageState extends State<AdminAppointmentsPage> {
     final list = _visible;
 
     return Scaffold(
+      bottomNavigationBar: const ABottomNavBar(
+        selectedIndex: 2,
+      ), // 0-4 for differ
       backgroundColor: Colors.grey[50],
       body: Column(
         children: [
@@ -156,10 +176,12 @@ class _AdminAppointmentsPageState extends State<AdminAppointmentsPage> {
                   else
                     Column(
                       children: list
-                          .map((a) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _AppointmentCard(appointment: a),
-                              ))
+                          .map(
+                            (a) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _AppointmentCard(appointment: a),
+                            ),
+                          )
                           .toList(),
                     ),
                 ],
@@ -286,7 +308,10 @@ class _AdminAppointmentsPageState extends State<AdminAppointmentsPage> {
         children: const [
           Icon(Icons.event_busy, color: kPrimary, size: 40),
           SizedBox(height: 10),
-          Text('No appointments', style: TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            'No appointments',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
           SizedBox(height: 6),
           Text(
             'Try changing filters or add new appointments.',
@@ -368,7 +393,9 @@ class _SummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: constraints.maxWidth - 6),
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth - 6,
+                  ),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
@@ -489,7 +516,10 @@ class _AppointmentCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: statusData.bg,
                   borderRadius: BorderRadius.circular(20),
@@ -517,7 +547,10 @@ class _AppointmentCard extends StatelessWidget {
           // Doctor line
           Text(
             appointment.doctorName,
-            style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Text(
             appointment.specialty,
@@ -528,13 +561,23 @@ class _AppointmentCard extends StatelessWidget {
           // Date + Time row
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, size: 18, color: Colors.black54),
+              const Icon(
+                Icons.calendar_today_outlined,
+                size: 18,
+                color: Colors.black54,
+              ),
               const SizedBox(width: 6),
-              Text(df.format(appointment.dateTime), style: const TextStyle(color: Colors.black87)),
+              Text(
+                df.format(appointment.dateTime),
+                style: const TextStyle(color: Colors.black87),
+              ),
               const SizedBox(width: 18),
               const Icon(Icons.schedule, size: 18, color: Colors.black54),
               const SizedBox(width: 6),
-              Text(tf.format(appointment.dateTime), style: const TextStyle(color: Colors.black87)),
+              Text(
+                tf.format(appointment.dateTime),
+                style: const TextStyle(color: Colors.black87),
+              ),
             ],
           ),
           const SizedBox(height: 10),

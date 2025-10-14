@@ -82,7 +82,7 @@ class AdminDashboard extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [const Color(0xFF008B8B), Color.fromARGB(255, 16, 72, 67)],
+          colors: [const Color(0xFF1B5E57), Color.fromARGB(255, 16, 72, 67)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
