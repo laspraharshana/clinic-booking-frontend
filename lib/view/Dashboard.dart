@@ -200,9 +200,7 @@ class _DashboardState extends State<Dashboard> {
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const PlaceholderPage(title: "Add New Page"),
-          ),
+          MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
         );
         break;
       case 3:

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'Signinandsignup.dart';
+
 // Brand colors
 const kPrimaryDark = Color(0xFF1B5E57);
 const kPrimary = Color(0xFF06A27B);
@@ -38,7 +40,13 @@ class Skip3Screen extends StatelessWidget {
               right: 16,
               child: TextButton(
                 onPressed: onSkip ?? () => Navigator.maybePop(context),
-                child: const Text('Skip', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w500)),
+                child: const Text(
+                  'Skip',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ),
 
@@ -73,13 +81,26 @@ class Skip3Screen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: _GradientButton(
                       text: 'Get Started',
-                      trailing: const Icon(Icons.check_circle, color: Colors.white),
-                      onPressed: onGetStarted ?? () => _defaultFinish(context),
+                      trailing: const Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignInAndSignUp(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   if (showPageCount) ...[
                     const SizedBox(height: 8),
-                    const Text('3 of 3', style: TextStyle(color: Colors.black38, fontSize: 12)),
+                    const Text(
+                      '3 of 3',
+                      style: TextStyle(color: Colors.black38, fontSize: 12),
+                    ),
                   ],
                 ],
               ),
@@ -142,7 +163,11 @@ class _AccentCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14, offset: const Offset(0, 6)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       child: Icon(icon, color: kPrimaryDark, size: 26),
@@ -169,7 +194,11 @@ class _HeroCircle extends StatelessWidget {
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
             boxShadow: [
-              BoxShadow(color: Color(0x3306A27B), blurRadius: 40, spreadRadius: 10),
+              BoxShadow(
+                color: Color(0x3306A27B),
+                blurRadius: 40,
+                spreadRadius: 10,
+              ),
             ],
           ),
         ),
@@ -245,22 +274,19 @@ class _Dots extends StatelessWidget {
       height: 10,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(
-          count,
-          (i) {
-            final selected = i == current;
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: selected ? 24 : 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: selected ? kPrimaryDark : Colors.grey[300],
-                borderRadius: BorderRadius.circular(8),
-              ),
-            );
-          },
-        ),
+        children: List.generate(count, (i) {
+          final selected = i == current;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: selected ? 24 : 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: selected ? kPrimaryDark : Colors.grey[300],
+              borderRadius: BorderRadius.circular(8),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -272,7 +298,11 @@ class _GradientButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final Widget? trailing;
-  const _GradientButton({required this.text, required this.onPressed, this.trailing});
+  const _GradientButton({
+    required this.text,
+    required this.onPressed,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +311,11 @@ class _GradientButton extends StatelessWidget {
         gradient: LinearGradient(colors: [kPrimaryDark, kPrimary]),
         borderRadius: BorderRadius.all(Radius.circular(18)),
         boxShadow: [
-          BoxShadow(color: Color(0x22000000), blurRadius: 20, offset: Offset(0, 10)),
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
         ],
       ),
       child: SizedBox(
@@ -292,12 +326,20 @@ class _GradientButton extends StatelessWidget {
             elevation: 0,
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(width: 8),
               trailing ?? const SizedBox.shrink(),
             ],

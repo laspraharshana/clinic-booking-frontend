@@ -168,9 +168,7 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
       case 1:
         break; // already here
       case 2:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Add New Page Placeholder")),
-        );
+        //already same page
         break;
       case 3:
         Navigator.pushReplacement(

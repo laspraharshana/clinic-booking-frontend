@@ -309,11 +309,9 @@ class _ProfilePageState extends State<PatientProfilePage> {
         );
         break;
       case 2:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Add new - coming soon'),
-            backgroundColor: kPrimaryDark,
-          ),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
         );
         break;
       case 3:

@@ -220,8 +220,9 @@ class _VisitsPageState extends State<VisitsPage>
         );
         break;
       case 2:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Add New Page Placeholder")),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
         );
         break;
       case 3:

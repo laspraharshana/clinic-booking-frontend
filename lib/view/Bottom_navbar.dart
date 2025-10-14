@@ -22,7 +22,7 @@ class BottomNavBar extends StatelessWidget {
         page = const AllDoctorsPage();
         break;
       case 2:
-        page = const PlaceholderPage(title: "Add New Page");
+        page = const AllDoctorsPage();
         break;
       case 3:
         page = const VisitsPage();
