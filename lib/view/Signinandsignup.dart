@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 import '../admin/admin_dashbord.dart';
+import '../admin/admin_login.dart';
 import 'Dashboard.dart';
 
 // Use --dart-define to override on run. Emulator -> your PC: 10.0.2.2
@@ -352,7 +353,7 @@ class _SignInAndSignUpState extends State<SignInAndSignUp> {
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) =>
-                                                    const AdminDashboard(),
+                                                    const AdminLoginPage(),
                                               ),
                                             );
                                           },

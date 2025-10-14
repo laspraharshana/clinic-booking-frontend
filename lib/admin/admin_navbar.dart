@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'adminDoctors_page.dart';
+import 'admin_appointments.dart';
 import 'admin_dashbord.dart';
+import 'admin_settings.dart';
 import 'reports_page.dart';
 
 class ABottomNavBar extends StatelessWidget {
@@ -16,21 +19,19 @@ class ABottomNavBar extends StatelessWidget {
       case 0:
         page = const AdminDashboard();
         break;
-      // case 1:
-      //   page = const AllDoctorsPage();
-      //   break;
-      // case 2:
-      //   page = const PlaceholderPage(title: "Add New Page");
-      //   break;
+       case 1:
+         page = const ManageDoctorsPage();
+         break;
+       case 2:
+         page = const AdminAppointmentsPage();
+         break;
       case 3:
         page = const AdminReportsPage();
         break;
-      // case 4:
-      //    page = const PatientProfilePage();
-      //   break;
-      //  case 5:
-      //    page = const AdminSetting();
-      //   break;
+       case 4:
+          page = const SettingsPage();
+        break;
+       
       default:
         return;
     }

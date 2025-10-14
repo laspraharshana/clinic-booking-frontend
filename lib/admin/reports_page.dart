@@ -52,7 +52,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> {
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF008B8B), Color(0xFF20B2AA)],
+          colors: [Color(0xFF1B5E57), Color(0xFF00695C)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

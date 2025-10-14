@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'admin_navbar.dart';
+
 // Brand colors
 const kPrimaryDark = Color(0xFF1B5E57);
 const kPrimary = Color(0xFF00695C);
@@ -115,6 +117,9 @@ class _SettingsPageState extends State<SettingsPage> {
         : _name.trim().split(RegExp(r'\s+')).map((e) => e[0]).take(2).join().toUpperCase();
 
     return Scaffold(
+      bottomNavigationBar: const ABottomNavBar(
+        selectedIndex: 4,
+      ), // 0-4 for differ
       backgroundColor: Colors.grey[50],
       body: Column(
         children: [
