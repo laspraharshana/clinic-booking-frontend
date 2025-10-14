@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 import '../core/network/dio_client.dart';
-import 'doctor_list.dart';     // ensure this path/case matches your project
+import 'doctor_list.dart'; // ensure this path/case matches your project
 import 'patient_profile.dart';
 import 'visits_page.dart';
 
@@ -14,7 +14,10 @@ class PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: const Color(0xFF1B5E57)),
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: const Color(0xFF1B5E57),
+      ),
       body: Center(child: Text(title, style: const TextStyle(fontSize: 22))),
     );
   }
@@ -91,10 +94,7 @@ class _DashboardState extends State<Dashboard> {
   Future<void> _loadHeaderData() async {
     setState(() => _loadingStats = true);
     try {
-      await Future.wait([
-        _fetchAppointmentsCounts(),
-        _fetchSpecialtyCounts(),
-      ]);
+      await Future.wait([_fetchAppointmentsCounts(), _fetchSpecialtyCounts()]);
     } finally {
       if (mounted) setState(() => _loadingStats = false);
     }
@@ -103,7 +103,9 @@ class _DashboardState extends State<Dashboard> {
   // GET /v1/appointments/me → compute upcoming/completed (ignoring canceled)
   Future<void> _fetchAppointmentsCounts() async {
     final res = await _dio.get('/v1/appointments/me');
-    final list = (res.data['data'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    final list = (res.data['data'] as List)
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
     final now = DateTime.now().millisecondsSinceEpoch;
 
     int upcoming = 0;
@@ -132,7 +134,9 @@ class _DashboardState extends State<Dashboard> {
   // GET /v1/doctors → compute counts for card specialties
   Future<void> _fetchSpecialtyCounts() async {
     final res = await _dio.get('/v1/doctors');
-    final list = (res.data['data'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    final list = (res.data['data'] as List)
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
 
     // Raw counts by backend specialty
     final Map<String, int> raw = {};
@@ -150,12 +154,21 @@ class _DashboardState extends State<Dashboard> {
       'Pediatrics': ['Pediatrics'],
       'Eye Care': ['Ophthalmology', 'Eye Care'],
       'Orthopedics': ['Orthopedics'],
-      'General': ['General', 'General Medicine', 'Family Medicine', 'Internal Medicine'],
+      'General': [
+        'General',
+        'General Medicine',
+        'Family Medicine',
+        'Internal Medicine',
+      ],
     };
 
     final Map<String, int> cardCounts = {
-      'Cardiology': 0, 'Neurology': 0, 'Pediatrics': 0,
-      'Eye Care': 0, 'Orthopedics': 0, 'General': 0,
+      'Cardiology': 0,
+      'Neurology': 0,
+      'Pediatrics': 0,
+      'Eye Care': 0,
+      'Orthopedics': 0,
+      'General': 0,
     };
 
     raw.forEach((spec, count) {
@@ -179,16 +192,30 @@ class _DashboardState extends State<Dashboard> {
       case 0:
         break; // Home - stay
       case 1:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const AllDoctorsPage()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
+        );
         break;
       case 2:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderPage(title: "Add New Page")));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const PlaceholderPage(title: "Add New Page"),
+          ),
+        );
         break;
       case 3:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const VisitsPage()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const VisitsPage()),
+        );
         break;
       case 4:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const PatientProfilePage()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PatientProfilePage()),
+        );
         break;
     }
   }
@@ -202,7 +229,13 @@ class _DashboardState extends State<Dashboard> {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12.withOpacity(0.1), blurRadius: 6, offset: const Offset(0, -2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12.withOpacity(0.1),
+              blurRadius: 6,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -262,13 +295,30 @@ class _DashboardState extends State<Dashboard> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Good Afternoon", style: TextStyle(fontSize: 14, color: Colors.white70)),
-                          Text(_displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                          const Text(
+                            "Good Afternoon",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          Text(
+                            _displayName,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ],
                       ),
                     ],
                   ),
-                  const Icon(Icons.notifications_none, size: 28, color: Colors.white),
+                  const Icon(
+                    Icons.notifications_none,
+                    size: 28,
+                    color: Colors.white,
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -279,11 +329,20 @@ class _DashboardState extends State<Dashboard> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: const Offset(0, 3))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: TextField(
                   readOnly: true,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AllDoctorsPage())),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
+                  ),
                   decoration: const InputDecoration(
                     icon: Icon(Icons.search),
                     hintText: "Search doctors, symptoms, specialties...",
@@ -329,7 +388,10 @@ class _DashboardState extends State<Dashboard> {
         // Specialties Section
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text("Medical Specialties", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          child: Text(
+            "Medical Specialties",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(height: 15),
 
@@ -345,7 +407,9 @@ class _DashboardState extends State<Dashboard> {
               _buildSpecialtyCard(
                 context,
                 "Cardiology",
-                _loadingStats ? "…" : "${_specCounts['Cardiology'] ?? 0} doctors",
+                _loadingStats
+                    ? "…"
+                    : "${_specCounts['Cardiology'] ?? 0} doctors",
                 Icons.favorite,
                 Colors.red,
                 const AllDoctorsPage(initialSpecialty: "Cardiology"),
@@ -353,7 +417,9 @@ class _DashboardState extends State<Dashboard> {
               _buildSpecialtyCard(
                 context,
                 "Neurology",
-                _loadingStats ? "…" : "${_specCounts['Neurology'] ?? 0} doctors",
+                _loadingStats
+                    ? "…"
+                    : "${_specCounts['Neurology'] ?? 0} doctors",
                 Icons.psychology,
                 Colors.purple,
                 const AllDoctorsPage(initialSpecialty: "Neurology"),
@@ -361,7 +427,9 @@ class _DashboardState extends State<Dashboard> {
               _buildSpecialtyCard(
                 context,
                 "Pediatrics",
-                _loadingStats ? "…" : "${_specCounts['Pediatrics'] ?? 0} doctors",
+                _loadingStats
+                    ? "…"
+                    : "${_specCounts['Pediatrics'] ?? 0} doctors",
                 Icons.child_care,
                 Colors.pink,
                 const AllDoctorsPage(initialSpecialty: "Pediatrics"),
@@ -377,7 +445,9 @@ class _DashboardState extends State<Dashboard> {
               _buildSpecialtyCard(
                 context,
                 "Orthopedics",
-                _loadingStats ? "…" : "${_specCounts['Orthopedics'] ?? 0} doctors",
+                _loadingStats
+                    ? "…"
+                    : "${_specCounts['Orthopedics'] ?? 0} doctors",
                 Icons.fitness_center,
                 Colors.orange,
                 const AllDoctorsPage(initialSpecialty: "Orthopedics"),
@@ -405,15 +475,38 @@ class _DashboardState extends State<Dashboard> {
       onTap: () => _onBottomNavTapped(index),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
-        decoration: isSelected ? BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(20)) : null,
+        decoration: isSelected
+            ? BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(20),
+              )
+            : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? const Color(0xFF1B5E57) : Colors.grey),
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
+            ),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, color: isSelected ? const Color(0xFF1B5E57) : Colors.grey)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
+              ),
+            ),
             const SizedBox(height: 4),
-            if (isSelected) Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF1B5E57))),
+            if (isSelected)
+              Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF1B5E57),
+                ),
+              ),
           ],
         ),
       ),
@@ -425,21 +518,42 @@ class _DashboardState extends State<Dashboard> {
       onTap: () => _onBottomNavTapped(index),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: const Color(0xFF1B5E57), borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1B5E57),
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black12.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))]),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           Icon(icon, size: 30, color: color),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 4),
           Text(title, style: const TextStyle(color: Colors.black54)),
         ],
@@ -447,19 +561,49 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget _buildSpecialtyCard(BuildContext context, String title, String subtitle, IconData icon, Color color, Widget page) {
+  Widget _buildSpecialtyCard(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    Widget page,
+  ) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => page)),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => page),
+      ),
       child: Container(
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black12.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))]),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         padding: const EdgeInsets.all(16),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          CircleAvatar(radius: 28, backgroundColor: color.withOpacity(0.15), child: Icon(icon, size: 26, color: color)),
-          const SizedBox(height: 12),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: Colors.black54)),
-        ]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: color.withOpacity(0.15),
+              child: Icon(icon, size: 26, color: color),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(subtitle, style: const TextStyle(color: Colors.black54)),
+          ],
+        ),
       ),
     );
   }

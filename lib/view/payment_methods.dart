@@ -2,7 +2,8 @@ import 'patient_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:clinic_booking_frontend/core/network/dio_client.dart';
-import 'package:clinic_booking_frontend/brand_colors.dart' hide kPrimaryDark, kPrimary;
+import 'package:clinic_booking_frontend/brand_colors.dart'
+    hide kPrimaryDark, kPrimary;
 
 const String mePaymentsBase = '/v1/me/payment-methods';
 
@@ -44,7 +45,10 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     } on DioException catch (e) {
       setState(() {
         _loading = false;
-        _error = e.response?.data is Map ? ((e.response!.data as Map)['error']?.toString() ?? 'Failed to load') : 'Failed to load';
+        _error = e.response?.data is Map
+            ? ((e.response!.data as Map)['error']?.toString() ??
+                  'Failed to load')
+            : 'Failed to load';
       });
     } catch (_) {
       setState(() {
@@ -61,18 +65,25 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
     if (result == null) return;
     try {
-      await _dio.post(mePaymentsBase, data: {
-        'brand': result['brand'],
-        'last4': result['last4'],
-      });
+      await _dio.post(
+        mePaymentsBase,
+        data: {'brand': result['brand'], 'last4': result['last4']},
+      );
       await _load();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment method added')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Payment method added')));
       }
     } on DioException catch (e) {
       if (mounted) {
-        final msg = e.response?.data is Map ? ((e.response!.data as Map)['error']?.toString() ?? 'Failed to add') : 'Failed to add';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        final msg = e.response?.data is Map
+            ? ((e.response!.data as Map)['error']?.toString() ??
+                  'Failed to add')
+            : 'Failed to add';
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     }
   }
@@ -82,9 +93,13 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
       await _dio.delete('$mePaymentsBase/$id');
       setState(() => methods.removeWhere((m) => m['id'] == id));
     } on DioException catch (e) {
-      final msg = e.response?.data is Map ? ((e.response!.data as Map)['error']?.toString() ?? 'Delete failed') : 'Delete failed';
+      final msg = e.response?.data is Map
+          ? ((e.response!.data as Map)['error']?.toString() ?? 'Delete failed')
+          : 'Delete failed';
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     }
   }
@@ -107,31 +122,37 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
           ? const Center(child: CircularProgressIndicator())
           : _error != null
           ? Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 8),
-            OutlinedButton(onPressed: _load, child: const Text('Retry')),
-          ]),
-        ),
-      )
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_error!, style: const TextStyle(color: Colors.red)),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: _load,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            )
           : ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: methods.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
-        itemBuilder: (_, i) {
-          final m = methods[i];
-          return ListTile(
-            leading: const Icon(Icons.credit_card, color: kPrimaryDark),
-            title: Text('${m['brand']} •••• ${m['last4']}'),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _deleteMethod(m['id'] as String),
+              padding: const EdgeInsets.all(16),
+              itemCount: methods.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (_, i) {
+                final m = methods[i];
+                return ListTile(
+                  leading: const Icon(Icons.credit_card, color: kPrimaryDark),
+                  title: Text('${m['brand']} •••• ${m['last4']}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _deleteMethod(m['id'] as String),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }
@@ -161,21 +182,28 @@ class _AddMethodDialogState extends State<_AddMethodDialog> {
       title: const Text('Add payment method'),
       content: Form(
         key: _formKey,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextFormField(
-            controller: _brandCtrl,
-            decoration: const InputDecoration(labelText: 'Brand (e.g., Visa)'),
-            validator: (v) => (v == null || v.trim().length < 2) ? 'Enter brand' : null,
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _last4Ctrl,
-            decoration: const InputDecoration(labelText: 'Last 4 digits'),
-            keyboardType: TextInputType.number,
-            maxLength: 4,
-            validator: (v) => (v == null || v.trim().length != 4) ? 'Enter 4 digits' : null,
-          ),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _brandCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Brand (e.g., Visa)',
+              ),
+              validator: (v) =>
+                  (v == null || v.trim().length < 2) ? 'Enter brand' : null,
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _last4Ctrl,
+              decoration: const InputDecoration(labelText: 'Last 4 digits'),
+              keyboardType: TextInputType.number,
+              maxLength: 4,
+              validator: (v) =>
+                  (v == null || v.trim().length != 4) ? 'Enter 4 digits' : null,
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

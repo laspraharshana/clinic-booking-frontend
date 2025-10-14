@@ -9,14 +9,14 @@ import '../core/network/dio_client.dart';
 
 // Model for appointments returned by backend
 class _Appointment {
-  final String id;        // same as slotId
+  final String id; // same as slotId
   final String slotId;
   final String doctorId;
   final String patientId;
   final String? patientName;
   final int startUtc;
   final int endUtc;
-  final String status;    // booked | canceled
+  final String status; // booked | canceled
   final String? notes;
 
   _Appointment({
@@ -162,7 +162,7 @@ class _VisitsPageState extends State<VisitsPage>
 
     // Sort for nicer UX
     up.sort((a, b) => a.startUtc.compareTo(b.startUtc)); // soonest first
-    done.sort((a, b) => b.endUtc.compareTo(a.endUtc));   // most recent first
+    done.sort((a, b) => b.endUtc.compareTo(a.endUtc)); // most recent first
     cancel.sort((a, b) => b.startUtc.compareTo(a.startUtc));
 
     _upcoming = up;
@@ -176,9 +176,9 @@ class _VisitsPageState extends State<VisitsPage>
       // Refresh list
       await _loadData();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Appointment canceled')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Appointment canceled')));
       }
     } on DioException catch (e) {
       final code = e.response?.statusCode;
@@ -190,11 +190,15 @@ class _VisitsPageState extends State<VisitsPage>
         _ => 'Cancel failed',
       };
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cancel failed')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Cancel failed')));
       }
     }
   }
@@ -221,7 +225,7 @@ class _VisitsPageState extends State<VisitsPage>
         );
         break;
       case 3:
-      // already here
+        // already here
         break;
       case 4:
         Navigator.pushReplacement(
@@ -242,13 +246,15 @@ class _VisitsPageState extends State<VisitsPage>
       return '$h:${two(dt.minute)} $ampm';
     }
 
-    final isSameDay = start.year == end.year &&
+    final isSameDay =
+        start.year == end.year &&
         start.month == end.month &&
         start.day == end.day;
 
     final dateStr = '${start.month}/${start.day}/${start.year}';
-    final timeStr =
-    isSameDay ? '${fmtTime(start)} – ${fmtTime(end)}' : '${fmtTime(start)} → ${fmtTime(end)}';
+    final timeStr = isSameDay
+        ? '${fmtTime(start)} – ${fmtTime(end)}'
+        : '${fmtTime(start)} → ${fmtTime(end)}';
     return '$dateStr  •  $timeStr';
   }
 
@@ -327,9 +333,15 @@ class _VisitsPageState extends State<VisitsPage>
               dividerColor: Colors.transparent,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.black87,
-              indicatorPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              indicatorPadding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 2,
+              ),
               indicatorSize: TabBarIndicatorSize.tab,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+              labelPadding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 0,
+              ),
               indicator: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF1B5E57), Color(0xFF00695C)],
@@ -338,8 +350,13 @@ class _VisitsPageState extends State<VisitsPage>
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
-              labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+              labelStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
               tabs: tabs.map((t) => Tab(text: t)).toList(),
             ),
           ),
@@ -351,13 +368,13 @@ class _VisitsPageState extends State<VisitsPage>
                 : (_error != null)
                 ? _buildError(_error!)
                 : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildApptList(_upcoming, showCancel: true),
-                _buildApptList(_completed),
-                _buildApptList(_canceled),
-              ],
-            ),
+                    controller: _tabController,
+                    children: [
+                      _buildApptList(_upcoming, showCancel: true),
+                      _buildApptList(_completed),
+                      _buildApptList(_canceled),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -368,11 +385,14 @@ class _VisitsPageState extends State<VisitsPage>
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(msg, style: const TextStyle(color: Colors.red)),
-          const SizedBox(height: 12),
-          OutlinedButton(onPressed: _loadData, child: const Text('Retry')),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(msg, style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 12),
+            OutlinedButton(onPressed: _loadData, child: const Text('Retry')),
+          ],
+        ),
       ),
     );
   }
@@ -400,10 +420,18 @@ class _VisitsPageState extends State<VisitsPage>
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1B5E57),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 12,
+                    ),
                   ),
-                  child: const Text('Book Appointment', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'Book Appointment',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
           ],
@@ -442,25 +470,40 @@ class _VisitsPageState extends State<VisitsPage>
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
             child: ListTile(
               leading: Icon(leadingIcon, color: leadingColor),
-              title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              title: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (subtitle.isNotEmpty) Text(subtitle),
                   Text(when),
-                  if ((a.notes ?? '').isNotEmpty) Text('Notes: ${a.notes}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                  if ((a.notes ?? '').isNotEmpty)
+                    Text(
+                      'Notes: ${a.notes}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
               trailing: showCancel && a.status != 'canceled'
                   ? TextButton(
-                onPressed: () => _cancelAppointment(a),
-                child: const Text('Cancel', style: TextStyle(color: Colors.red)),
-              )
+                      onPressed: () => _cancelAppointment(a),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    )
                   : null,
             ),
           );
@@ -478,9 +521,9 @@ class _VisitsPageState extends State<VisitsPage>
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
         decoration: isSelected
             ? BoxDecoration(
-          color: Colors.green[50],
-          borderRadius: BorderRadius.circular(20),
-        )
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(20),
+              )
             : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,

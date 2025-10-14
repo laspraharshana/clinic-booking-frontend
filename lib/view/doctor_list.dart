@@ -33,8 +33,12 @@ class Doctor {
       specialty: (json['specialty'] as String?) ?? '',
       clinicName: json['clinicName'] as String?,
       imageUrl: (json['photoUrl'] as String?) ?? (json['imageUrl'] as String?),
-      rating: (json['rating'] is num) ? (json['rating'] as num).toDouble() : null,
-      consultationFee: (json['consultationFee'] is num) ? (json['consultationFee'] as num).toDouble() : null,
+      rating: (json['rating'] is num)
+          ? (json['rating'] as num).toDouble()
+          : null,
+      consultationFee: (json['consultationFee'] is num)
+          ? (json['consultationFee'] as num).toDouble()
+          : null,
     );
   }
 }
@@ -96,7 +100,8 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
       final specList = ['All Specialties', ...specSet.toList()..sort()];
 
       String nextSelected = 'All Specialties';
-      if (widget.initialSpecialty != null && specList.contains(widget.initialSpecialty)) {
+      if (widget.initialSpecialty != null &&
+          specList.contains(widget.initialSpecialty)) {
         nextSelected = widget.initialSpecialty!;
       }
 
@@ -112,7 +117,9 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
     } on DioException catch (e) {
       setState(() {
         _loading = false;
-        _error = e.response?.data is Map && (e.response!.data as Map)['error'] != null
+        _error =
+            e.response?.data is Map &&
+                (e.response!.data as Map)['error'] != null
             ? (e.response!.data as Map)['error'].toString()
             : 'Failed to load doctors';
       });
@@ -128,11 +135,14 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
     final q = searchController.text.toLowerCase();
     setState(() {
       filteredDoctors = allDoctors.where((d) {
-        final matchesQuery = q.isEmpty ||
+        final matchesQuery =
+            q.isEmpty ||
             d.name.toLowerCase().contains(q) ||
             d.specialty.toLowerCase().contains(q) ||
             (d.clinicName ?? '').toLowerCase().contains(q);
-        final matchesSpec = selectedSpecialty == 'All Specialties' || d.specialty == selectedSpecialty;
+        final matchesSpec =
+            selectedSpecialty == 'All Specialties' ||
+            d.specialty == selectedSpecialty;
         return matchesQuery && matchesSpec;
       }).toList();
     });
@@ -150,33 +160,54 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
     setState(() => _selectedIndex = index);
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Dashboard()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const Dashboard()),
+        );
         break;
       case 1:
         break; // already here
       case 2:
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Add New Page Placeholder")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Add New Page Placeholder")),
+        );
         break;
       case 3:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const VisitsPage()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const VisitsPage()),
+        );
         break;
       case 4:
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Profile Page Placeholder")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile Page Placeholder")),
+        );
         break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final dropMaxHeight = MediaQuery.of(context).size.height * 0.4; // cap dropdown height
+    final dropMaxHeight =
+        MediaQuery.of(context).size.height * 0.4; // cap dropdown height
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
       resizeToAvoidBottomInset: true,
 
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black), onPressed: () => Navigator.pop(context)),
-        title: const Text('All Doctors', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'All Doctors',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -185,7 +216,13 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12.withOpacity(0.1), blurRadius: 6, offset: const Offset(0, -2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12.withOpacity(0.1),
+              blurRadius: 6,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -209,7 +246,10 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
               child: Column(
                 children: [
                   Container(
-                    decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: TextField(
                       controller: searchController,
                       decoration: InputDecoration(
@@ -217,21 +257,39 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
                         hintStyle: TextStyle(color: Colors.grey[500]),
                         prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   GestureDetector(
-                    onTap: () => setState(() => isDropdownOpen = !isDropdownOpen),
+                    onTap: () =>
+                        setState(() => isDropdownOpen = !isDropdownOpen),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(selectedSpecialty, style: const TextStyle(fontSize: 15)),
-                          Icon(isDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.grey[600]),
+                          Text(
+                            selectedSpecialty,
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Icon(
+                            isDropdownOpen
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: Colors.grey[600],
+                          ),
                         ],
                       ),
                     ),
@@ -248,28 +306,50 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: ListView.separated(
                   padding: EdgeInsets.zero,
                   itemCount: specialties.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFEFEFEF)),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, color: Color(0xFFEFEFEF)),
                   itemBuilder: (context, i) {
                     final specialty = specialties[i];
                     final isSelected = specialty == selectedSpecialty;
                     return InkWell(
                       onTap: () => _selectSpecialty(specialty),
                       child: Container(
-                        color: isSelected ? const Color(0xFFE0F2F1) : Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        color: isSelected
+                            ? const Color(0xFFE0F2F1)
+                            : Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               specialty,
-                              style: TextStyle(fontSize: 15, color: isSelected ? const Color(0xFF00695C) : Colors.black),
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: isSelected
+                                    ? const Color(0xFF00695C)
+                                    : Colors.black,
+                              ),
                             ),
-                            if (isSelected) const Icon(Icons.check, color: Color(0xFF00695C), size: 20),
+                            if (isSelected)
+                              const Icon(
+                                Icons.check,
+                                color: Color(0xFF00695C),
+                                size: 20,
+                              ),
                           ],
                         ),
                       ),
@@ -285,26 +365,41 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : (_error != null)
-                  ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
+                  ? Center(
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    )
                   : (filteredDoctors.isEmpty)
                   ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text('No doctors found', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
-                  ],
-                ),
-              )
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No doctors found',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: filteredDoctors.length,
-                itemBuilder: (context, index) {
-                  final d = filteredDoctors[index];
-                  return _buildDoctorCard(context, d);
-                },
-              ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: filteredDoctors.length,
+                      itemBuilder: (context, index) {
+                        final d = filteredDoctors[index];
+                        return _buildDoctorCard(context, d);
+                      },
+                    ),
             ),
           ],
         ),
@@ -333,27 +428,57 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 60, height: 60,
-              decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: d.imageUrl != null && d.imageUrl!.isNotEmpty
                   ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(d.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.person, size: 32, color: Colors.grey[400])),
-              )
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        d.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.person,
+                          size: 32,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    )
                   : Icon(Icons.person, size: 32, color: Colors.grey[400]),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(d.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(d.specialty, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-              ]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    d.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    d.specialty,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
             ),
             if (d.rating != null) ...[
               const Icon(Icons.star, color: Colors.amber, size: 18),
@@ -375,15 +500,38 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
       onTap: () => _onBottomNavTapped(index),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
-        decoration: isSelected ? BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(20)) : null,
+        decoration: isSelected
+            ? BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(20),
+              )
+            : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? const Color(0xFF1B5E57) : Colors.grey),
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
+            ),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, color: isSelected ? const Color(0xFF1B5E57) : Colors.grey)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? const Color(0xFF1B5E57) : Colors.grey,
+              ),
+            ),
             const SizedBox(height: 4),
-            if (isSelected) Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF1B5E57))),
+            if (isSelected)
+              Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF1B5E57),
+                ),
+              ),
           ],
         ),
       ),
@@ -395,7 +543,10 @@ class _AllDoctorsPageState extends State<AllDoctorsPage> {
       onTap: () => _onBottomNavTapped(index),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: const Color(0xFF1B5E57), borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1B5E57),
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );

@@ -24,7 +24,7 @@ class BookingConfirmedPage extends StatelessWidget {
   final String specialty;
   final int startUtc;
   final int endUtc;
-  final String currency;      // e.g., 'LKR'
+  final String currency; // e.g., 'LKR'
   final double consultationFee;
   final double platformFee;
   final double total;
@@ -69,7 +69,11 @@ class BookingConfirmedPage extends StatelessWidget {
                       color: const Color(0xFF4CAF50),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.check, color: Colors.white, size: 28),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
@@ -106,8 +110,10 @@ class BookingConfirmedPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Appointment Details',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Appointment Details',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   _row('Doctor', doctorName),
                   const SizedBox(height: 8),
@@ -149,15 +155,30 @@ class BookingConfirmedPage extends StatelessWidget {
                 children: [
                   const Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Payment Summary',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'Payment Summary',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  _row('Consultation Fee', '$currency ${consultationFee.toStringAsFixed(0)}'),
+                  _row(
+                    'Consultation Fee',
+                    '$currency ${consultationFee.toStringAsFixed(0)}',
+                  ),
                   const SizedBox(height: 8),
-                  _row('Platform Fee', '$currency ${platformFee.toStringAsFixed(0)}'),
+                  _row(
+                    'Platform Fee',
+                    '$currency ${platformFee.toStringAsFixed(0)}',
+                  ),
                   const Divider(height: 24),
-                  _row('Total', '$currency ${total.toStringAsFixed(0)}', isBold: true),
+                  _row(
+                    'Total',
+                    '$currency ${total.toStringAsFixed(0)}',
+                    isBold: true,
+                  ),
                 ],
               ),
             ),
@@ -173,16 +194,23 @@ class BookingConfirmedPage extends StatelessWidget {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (_) => const VisitsPage()),
-                            (route) => false,
+                        (route) => false,
                       );
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF00695C)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('View My Appointments',
-                        style: TextStyle(color: Color(0xFF00695C), fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'View My Appointments',
+                      style: TextStyle(
+                        color: Color(0xFF00695C),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -192,16 +220,24 @@ class BookingConfirmedPage extends StatelessWidget {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (_) => const Dashboard()),
-                            (route) => false,
+                        (route) => false,
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF00695C),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       elevation: 0,
                     ),
-                    child: const Text('Done', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                    child: const Text(
+                      'Done',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -216,7 +252,10 @@ class BookingConfirmedPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.black87),
+        ),
         Flexible(
           child: Text(
             value,

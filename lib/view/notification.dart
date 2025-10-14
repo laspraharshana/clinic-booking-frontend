@@ -37,7 +37,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     try {
       final res = await _dio.get(meBase);
       final data = Map<String, dynamic>.from(res.data['data'] as Map);
-      final n = Map<String, dynamic>.from((data['notifications'] as Map?) ?? {});
+      final n = Map<String, dynamic>.from(
+        (data['notifications'] as Map?) ?? {},
+      );
       setState(() {
         push = (n['push'] as bool?) ?? push;
         reminders = (n['reminders'] as bool?) ?? reminders;
@@ -48,7 +50,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
     } on DioException catch (e) {
       setState(() {
         _loading = false;
-        _error = e.response?.data is Map ? ((e.response!.data as Map)['error']?.toString() ?? 'Failed to load') : 'Failed to load';
+        _error = e.response?.data is Map
+            ? ((e.response!.data as Map)['error']?.toString() ??
+                  'Failed to load')
+            : 'Failed to load';
       });
     } catch (_) {
       setState(() {
@@ -60,26 +65,40 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Future<void> _saveAll() async {
     try {
-      await _dio.patch(meBase, data: {
-        'notifications': {
-          'push': push,
-          'reminders': reminders,
-          'sound': sound,
-          'email': email,
-        }
-      });
+      await _dio.patch(
+        meBase,
+        data: {
+          'notifications': {
+            'push': push,
+            'reminders': reminders,
+            'sound': sound,
+            'email': email,
+          },
+        },
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Saved')));
       }
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.response?.data is Map ? ((e.response!.data as Map)['error']?.toString() ?? 'Save failed') : 'Save failed')),
+          SnackBar(
+            content: Text(
+              e.response?.data is Map
+                  ? ((e.response!.data as Map)['error']?.toString() ??
+                        'Save failed')
+                  : 'Save failed',
+            ),
+          ),
         );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Save failed')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Save failed')));
       }
     }
   }
@@ -147,15 +166,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ? const Center(child: CircularProgressIndicator())
           : _error != null
           ? Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 8),
-            OutlinedButton(onPressed: _load, child: const Text('Retry')),
-          ]),
-        ),
-      )
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_error!, style: const TextStyle(color: Colors.red)),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: _load,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            )
           : ListView(padding: const EdgeInsets.only(top: 8), children: tiles),
     );
   }

@@ -44,7 +44,10 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     } on DioException catch (e) {
       setState(() {
         _loading = false;
-        _error = e.response?.data is Map ? ((e.response!.data as Map)['error']?.toString() ?? 'Failed to load') : 'Failed to load';
+        _error = e.response?.data is Map
+            ? ((e.response!.data as Map)['error']?.toString() ??
+                  'Failed to load')
+            : 'Failed to load';
       });
     } catch (_) {
       setState(() {
@@ -55,14 +58,16 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   }
 
   Future<void> _saveAll() async {
-    await _dio.patch(meBase, data: {
-      'privacy': {
-        'biometric': biometric,
-        'twoFactor': twoFactor,
-      }
-    });
+    await _dio.patch(
+      meBase,
+      data: {
+        'privacy': {'biometric': biometric, 'twoFactor': twoFactor},
+      },
+    );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Saved')));
     }
   }
 
@@ -81,7 +86,9 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
         twoFactor = prevT;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Save failed')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Save failed')));
       }
     }
   }
@@ -91,36 +98,76 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (_) => Padding(
-        padding: EdgeInsets.only(left: 16, right: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16, top: 16),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Change Password', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          const TextField(obscureText: true, decoration: InputDecoration(labelText: 'Current password')),
-          const SizedBox(height: 8),
-          const TextField(obscureText: true, decoration: InputDecoration(labelText: 'New password')),
-          const SizedBox(height: 8),
-          const TextField(obscureText: true, decoration: InputDecoration(labelText: 'Confirm new password')),
-          const SizedBox(height: 12),
-          Row(children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                style: OutlinedButton.styleFrom(side: const BorderSide(color: kPrimaryDark), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                child: const Text('Cancel', style: TextStyle(color: kPrimaryDark)),
-              ),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          top: 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Change Password',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(backgroundColor: kPrimaryDark, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                child: const Text('Save', style: TextStyle(color: Colors.white)),
-              ),
+            const SizedBox(height: 12),
+            const TextField(
+              obscureText: true,
+              decoration: InputDecoration(labelText: 'Current password'),
             ),
-          ]),
-        ]),
+            const SizedBox(height: 8),
+            const TextField(
+              obscureText: true,
+              decoration: InputDecoration(labelText: 'New password'),
+            ),
+            const SizedBox(height: 8),
+            const TextField(
+              obscureText: true,
+              decoration: InputDecoration(labelText: 'Confirm new password'),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: kPrimaryDark),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: kPrimaryDark),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kPrimaryDark,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -129,21 +176,32 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   Widget build(BuildContext context) {
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Privacy & Security'), backgroundColor: kPrimaryDark, foregroundColor: Colors.white),
+        appBar: AppBar(
+          title: const Text('Privacy & Security'),
+          backgroundColor: kPrimaryDark,
+          foregroundColor: Colors.white,
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Privacy & Security'), backgroundColor: kPrimaryDark, foregroundColor: Colors.white),
+        appBar: AppBar(
+          title: const Text('Privacy & Security'),
+          backgroundColor: kPrimaryDark,
+          foregroundColor: Colors.white,
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(_error!, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 8),
-              OutlinedButton(onPressed: _load, child: const Text('Retry')),
-            ]),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_error!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 8),
+                OutlinedButton(onPressed: _load, child: const Text('Retry')),
+              ],
+            ),
           ),
         ),
       );
@@ -185,7 +243,9 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Delete account is not implemented')),
+                const SnackBar(
+                  content: Text('Delete account is not implemented'),
+                ),
               );
             },
           ),

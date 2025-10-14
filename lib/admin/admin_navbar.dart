@@ -19,19 +19,19 @@ class ABottomNavBar extends StatelessWidget {
       case 0:
         page = const AdminDashboard();
         break;
-       case 1:
-         page = const ManageDoctorsPage();
-         break;
-       case 2:
-         page = const AdminAppointmentsPage();
-         break;
+      case 1:
+        page = const ManageDoctorsPage();
+        break;
+      case 2:
+        page = const AdminAppointmentsPage();
+        break;
       case 3:
         page = const AdminReportsPage();
         break;
-       case 4:
-          page = const SettingsPage();
+      case 4:
+        page = const SettingsPage();
         break;
-       
+
       default:
         return;
     }

@@ -2,7 +2,7 @@
 // ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart';
-    //show defaultTargetPlatform, kIsWeb, TargetPlatform;
+//show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -71,5 +71,4 @@ class DefaultFirebaseOptions {
     authDomain: 'clinic-booking-app-a6f1b.firebaseapp.com',
     storageBucket: 'clinic-booking-app-a6f1b.firebasestorage.app',
   );
-
 }

@@ -94,8 +94,10 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         _rating = (data['rating'] as num?)?.toDouble();
         _consultationFee = (data['consultationFee'] as num?)?.toInt();
         _photoUrl = data['photoUrl'] as String?;
-        _nextAvailableStartUtc = (data['nextAvailableStartUtc'] as num?)?.toInt();
-        _reviewsCount = (data['reviewsCount'] as num?)?.toInt(); // if not present, stays null
+        _nextAvailableStartUtc = (data['nextAvailableStartUtc'] as num?)
+            ?.toInt();
+        _reviewsCount = (data['reviewsCount'] as num?)
+            ?.toInt(); // if not present, stays null
         _loading = false;
       });
     } catch (e) {
@@ -110,7 +112,8 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     if (ms == null) return 'No upcoming slots';
     final dt = DateTime.fromMillisecondsSinceEpoch(ms).toLocal();
     final now = DateTime.now();
-    final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+    final isToday =
+        dt.year == now.year && dt.month == now.month && dt.day == now.day;
     final two = (int n) => n.toString().padLeft(2, '0');
     final h12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
@@ -155,7 +158,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     final yearsExp = _yearsExp?.toString() ?? '—';
     final patients = _patientsCount?.toString() ?? '—';
     final rating = _rating != null ? _rating!.toStringAsFixed(1) : '—';
-    final fee = _consultationFee != null ? 'LKR ${_consultationFee!.toStringAsFixed(0)}' : '—';
+    final fee = _consultationFee != null
+        ? 'LKR ${_consultationFee!.toStringAsFixed(0)}'
+        : '—';
     final nextAvail = _formatNext(_nextAvailableStartUtc);
     final available = _nextAvailableStartUtc != null;
 
@@ -163,7 +168,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         ? NetworkImage(_photoUrl!)
         : const AssetImage('assets/doctor.jpg');
 
-    final reviewsText = (_reviewsCount != null) ? ' ($_reviewsCount reviews)' : '';
+    final reviewsText = (_reviewsCount != null)
+        ? ' ($_reviewsCount reviews)'
+        : '';
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -191,11 +198,17 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                     Text(
                       name,
                       style: const TextStyle(
-                          color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       specialty,
-                      style: const TextStyle(color: Colors.white70, fontSize: 16),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -210,7 +223,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                         const SizedBox(width: 8),
                         Icon(
                           available ? Icons.check_circle : Icons.cancel,
-                          color: available ? Colors.lightGreenAccent : Colors.redAccent,
+                          color: available
+                              ? Colors.lightGreenAccent
+                              : Colors.redAccent,
                         ),
                         Text(
                           available ? ' Available' : ' Unavailable',
@@ -230,7 +245,11 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _infoCard(yearsExp == '—' ? '—' : '$yearsExp+', 'Years Exp', Icons.work),
+                    _infoCard(
+                      yearsExp == '—' ? '—' : '$yearsExp+',
+                      'Years Exp',
+                      Icons.work,
+                    ),
                     _infoCard(patients, 'Patients', Icons.people),
                     _infoCard(rating, 'Rating', Icons.star),
                   ],
@@ -243,52 +262,76 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
               _sectionCard('About', bio),
 
               // Location
-              _sectionCard('Location', '',
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        clinicName.isNotEmpty
-                            ? clinicName + (_address != null && _address!.isNotEmpty ? '\n$_address' : '')
-                            : (_address ?? '—'),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        height: 120,
-                        color: Colors.grey[200],
-                        child: const Center(
-                            child: Text('Interactive map', style: TextStyle(color: Colors.grey))),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.teal),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              _sectionCard(
+                'Location',
+                '',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      clinicName.isNotEmpty
+                          ? clinicName +
+                                (_address != null && _address!.isNotEmpty
+                                    ? '\n$_address'
+                                    : '')
+                          : (_address ?? '—'),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 120,
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Text(
+                          'Interactive map',
+                          style: TextStyle(color: Colors.grey),
                         ),
-                        child: const Text('Get Directions', style: TextStyle(color: Colors.teal)),
                       ),
-                    ],
-                  )),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.teal),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Get Directions',
+                        style: TextStyle(color: Colors.teal),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
               // Availability & Pricing
-              _sectionCard('Availability & Pricing', '',
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.access_time, color: Colors.teal),
-                        title: const Text('Next Available'),
-                        trailing: Text(nextAvail),
+              _sectionCard(
+                'Availability & Pricing',
+                '',
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(
+                        Icons.access_time,
+                        color: Colors.teal,
                       ),
-                      ListTile(
-                        leading: const Icon(Icons.attach_money, color: Colors.teal),
-                        title: const Text('Consultation Fee'),
-                        trailing: Text(fee),
+                      title: const Text('Next Available'),
+                      trailing: Text(nextAvail),
+                    ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.attach_money,
+                        color: Colors.teal,
                       ),
-                    ],
-                  )),
+                      title: const Text('Consultation Fee'),
+                      trailing: Text(fee),
+                    ),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 20),
 
@@ -298,27 +341,32 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 child: ElevatedButton(
                   onPressed: available
                       ? () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BookAppointmentPage(
-                          doctorId: widget.doctorId,
-                          doctorName: name,
-                          specialty: specialty,
-                          clinicName: clinicName,
-                        ),
-                      ),
-                    );
-                  }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BookAppointmentPage(
+                                doctorId: widget.doctorId,
+                                doctorName: name,
+                                specialty: specialty,
+                                clinicName: clinicName,
+                              ),
+                            ),
+                          );
+                        }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00695C),
                     disabledBackgroundColor: Colors.grey[300],
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Center(
-                    child: Text('Book Appointment', style: TextStyle(fontSize: 16, color: Colors.white)),
+                    child: Text(
+                      'Book Appointment',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                 ),
               ),
@@ -337,7 +385,10 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       children: [
         Icon(icon, color: Colors.teal, size: 28),
         const SizedBox(height: 6),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         Text(label, style: const TextStyle(color: Colors.grey)),
       ],
     );
@@ -351,14 +402,24 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 3))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
-          if (description.isNotEmpty) Text(description, style: const TextStyle(fontSize: 14)),
+          if (description.isNotEmpty)
+            Text(description, style: const TextStyle(fontSize: 14)),
           if (child != null) child,
         ],
       ),

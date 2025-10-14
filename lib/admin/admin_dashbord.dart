@@ -69,58 +69,58 @@ class _AdminDashboardState extends State<AdminDashboard> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(child: _buildHeader()),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 24,
+              slivers: [
+                SliverToBoxAdapter(child: _buildHeader()),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 1.4,
+                        ),
+                    delegate: SliverChildListDelegate([
+                      _buildStatCard(
+                        'Total Doctors',
+                        '$totalDoctors',
+                        Icons.people_outline,
+                        const Color(0xFFE3F2FD),
+                        const Color(0xFF2196F3),
+                      ),
+                      _buildStatCard(
+                        'Total Patients',
+                        '$totalPatients',
+                        Icons.person_outline,
+                        const Color(0xFFE0F7FA),
+                        const Color(0xFF00BCD4),
+                      ),
+                      _buildStatCard(
+                        'Appointments',
+                        '$totalAppointments',
+                        Icons.calendar_today_outlined,
+                        const Color(0xFFF3E5F5),
+                        const Color(0xFF9C27B0),
+                      ),
+                      _buildStatCard(
+                        'Earnings',
+                        '\$${earnings.toStringAsFixed(2)}',
+                        Icons.payments_outlined,
+                        const Color(0xFFFFF9C4),
+                        const Color(0xFFFFC107),
+                      ),
+                    ]),
+                  ),
+                ),
+                SliverToBoxAdapter(child: _buildQuickActions()),
+                SliverToBoxAdapter(child: _buildRecentAppointments()),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
             ),
-            sliver: SliverGrid(
-              gridDelegate:
-              const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.4,
-              ),
-              delegate: SliverChildListDelegate([
-                _buildStatCard(
-                  'Total Doctors',
-                  '$totalDoctors',
-                  Icons.people_outline,
-                  const Color(0xFFE3F2FD),
-                  const Color(0xFF2196F3),
-                ),
-                _buildStatCard(
-                  'Total Patients',
-                  '$totalPatients',
-                  Icons.person_outline,
-                  const Color(0xFFE0F7FA),
-                  const Color(0xFF00BCD4),
-                ),
-                _buildStatCard(
-                  'Appointments',
-                  '$totalAppointments',
-                  Icons.calendar_today_outlined,
-                  const Color(0xFFF3E5F5),
-                  const Color(0xFF9C27B0),
-                ),
-                _buildStatCard(
-                  'Earnings',
-                  '\$${earnings.toStringAsFixed(2)}',
-                  Icons.payments_outlined,
-                  const Color(0xFFFFF9C4),
-                  const Color(0xFFFFC107),
-                ),
-              ]),
-            ),
-          ),
-          SliverToBoxAdapter(child: _buildQuickActions()),
-          SliverToBoxAdapter(child: _buildRecentAppointments()),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
-      ),
     );
   }
 
@@ -175,12 +175,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   // -------------------- STATS GRID --------------------
   Widget _buildStatCard(
-      String title,
-      String value,
-      IconData icon,
-      Color bgColor,
-      Color iconColor,
-      ) {
+    String title,
+    String value,
+    IconData icon,
+    Color bgColor,
+    Color iconColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -297,11 +297,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildActionCard(
-      String title,
-      IconData icon,
-      Color bgColor,
-      Color iconColor,
-      ) {
+    String title,
+    IconData icon,
+    Color bgColor,
+    Color iconColor,
+  ) {
     return GestureDetector(
       onTap: () {
         if (title == 'Add Doctor') {
@@ -375,10 +375,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
               GestureDetector(
                 onTap:
                     (
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (_) => const AdminAppointmentsPage()),
-                    // );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (_) => const AdminAppointmentsPage()),
+                      // );
                     ) {},
                 child: const Text(
                   'View All',
@@ -407,12 +407,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildAppointmentItem(
-      String patientName,
-      String doctorName,
-      String time,
-      String status,
-      Color statusColor,
-      ) {
+    String patientName,
+    String doctorName,
+    String time,
+    String status,
+    Color statusColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),

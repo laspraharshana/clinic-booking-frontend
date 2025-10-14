@@ -44,7 +44,10 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
     } on DioException catch (e) {
       setState(() {
         _loading = false;
-        _error = e.response?.data is Map ? ((e.response!.data as Map)['error']?.toString() ?? 'Failed to load') : 'Failed to load';
+        _error = e.response?.data is Map
+            ? ((e.response!.data as Map)['error']?.toString() ??
+                  'Failed to load')
+            : 'Failed to load';
       });
     } catch (_) {
       setState(() {
@@ -55,11 +58,16 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   }
 
   Future<void> _saveApp() async {
-    await _dio.patch(meBase, data: {
-      'app': {'darkMode': darkMode, 'language': language}
-    });
+    await _dio.patch(
+      meBase,
+      data: {
+        'app': {'darkMode': darkMode, 'language': language},
+      },
+    );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Saved')));
     }
   }
 
@@ -71,7 +79,9 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
     } catch (_) {
       setState(() => darkMode = prev);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Save failed')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Save failed')));
       }
     }
   }
@@ -84,7 +94,9 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
     } catch (_) {
       setState(() => language = prev);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Save failed')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Save failed')));
       }
     }
   }
@@ -93,21 +105,32 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   Widget build(BuildContext context) {
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('App Settings'), backgroundColor: kPrimaryDark, foregroundColor: Colors.white),
+        appBar: AppBar(
+          title: const Text('App Settings'),
+          backgroundColor: kPrimaryDark,
+          foregroundColor: Colors.white,
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('App Settings'), backgroundColor: kPrimaryDark, foregroundColor: Colors.white),
+        appBar: AppBar(
+          title: const Text('App Settings'),
+          backgroundColor: kPrimaryDark,
+          foregroundColor: Colors.white,
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(_error!, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 8),
-              OutlinedButton(onPressed: _load, child: const Text('Retry')),
-            ]),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_error!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 8),
+                OutlinedButton(onPressed: _load, child: const Text('Retry')),
+              ],
+            ),
           ),
         ),
       );
@@ -142,9 +165,18 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ListTile(title: const Text('English'), onTap: () => Navigator.pop(context, 'English')),
-                      ListTile(title: const Text('Sinhala'), onTap: () => Navigator.pop(context, 'Sinhala')),
-                      ListTile(title: const Text('Tamil'), onTap: () => Navigator.pop(context, 'Tamil')),
+                      ListTile(
+                        title: const Text('English'),
+                        onTap: () => Navigator.pop(context, 'English'),
+                      ),
+                      ListTile(
+                        title: const Text('Sinhala'),
+                        onTap: () => Navigator.pop(context, 'Sinhala'),
+                      ),
+                      ListTile(
+                        title: const Text('Tamil'),
+                        onTap: () => Navigator.pop(context, 'Tamil'),
+                      ),
                     ],
                   ),
                 ),
