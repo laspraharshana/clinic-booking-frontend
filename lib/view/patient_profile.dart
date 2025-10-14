@@ -1,4 +1,7 @@
-import 'Doctor_list.dart';
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+
+import 'doctor_list.dart'; // make sure the filename and case match
 import 'SigninAndSignup.dart';
 import 'auth_service.dart';
 import 'contact_support.dart';
@@ -7,12 +10,15 @@ import 'notification.dart';
 import 'payment_methods.dart';
 import 'privacy_security.dart';
 import 'app_settings.dart';
-import 'package:flutter/material.dart';
 import 'visits_page.dart';
+import '../core/network/dio_client.dart';
 
 // Brand colors
 const kPrimaryDark = Color(0xFF1B5E57);
 const kPrimary = Color(0xFF00695C);
+
+// Adjust this if your me.routes.ts is mounted differently
+const String meBase = '/v1/me'; // if you mounted as app.use('/v1/me', meRouter)
 
 class PatientProfilePage extends StatefulWidget {
   const PatientProfilePage({super.key});
@@ -24,53 +30,105 @@ class PatientProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<PatientProfilePage> {
   int _selectedIndex = 4; // Profile selected
 
-  // Editable fields
-  String _fullName = 'Sarah Johnson';
+  // Backend data
+  String _fullName = '—';
   String _phone = '';
+  String? _photoUrl;
 
-  void _onBottomNavTapped(int index) {
-    setState(() => _selectedIndex = index);
+  // Stats
+  int _upcomingCount = 0;
+  int _completedCount = 0;
+  int _totalVisits = 0; // we’ll show total visits here (completed + upcoming)
 
-    switch (index) {
-      case 0:
-        if (Navigator.canPop(context))
-          Navigator.pop(context); // Home -> back to Dashboard
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
-        );
-        break;
-      case 2:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Add new - coming soon'),
-            backgroundColor: kPrimaryDark,
-          ),
-        );
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const VisitsPage()),
-        );
-        break;
-      case 4:
-        // already here
-        break;
+  bool _loading = true;
+  String? _error;
+
+  late final Dio _dio;
+
+  @override
+  void initState() {
+    super.initState();
+    _dio = createDio();
+    _loadAll();
+  }
+
+  Future<void> _loadAll() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await Future.wait([_fetchProfile(), _fetchAppointmentsCounts()]);
+      setState(() => _loading = false);
+    } on DioException catch (e) {
+      final msg = e.response?.data is Map
+          ? ((e.response!.data as Map)['error']?.toString() ??
+                'Failed to load profile')
+          : 'Failed to load profile';
+      setState(() {
+        _loading = false;
+        _error = msg;
+      });
+    } catch (_) {
+      setState(() {
+        _loading = false;
+        _error = 'Failed to load profile';
+      });
     }
   }
 
+  Future<void> _fetchProfile() async {
+    final res = await _dio.get(meBase); // GET /v1/me
+    final data = Map<String, dynamic>.from(res.data['data'] as Map);
+    setState(() {
+      _fullName = (data['fullName'] as String?)?.trim().isNotEmpty == true
+          ? (data['fullName'] as String)
+          : 'User';
+      _phone = (data['phone'] as String?) ?? '';
+      _photoUrl = data['photoUrl'] as String?;
+    });
+  }
+
+  Future<void> _fetchAppointmentsCounts() async {
+    final res = await _dio.get('/v1/appointments/me');
+    final list = (res.data['data'] as List)
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    int upcoming = 0;
+    int completed = 0;
+    for (final a in list) {
+      final status = a['status'] as String? ?? 'booked';
+      final startUtc = (a['startUtc'] as num).toInt();
+      final endUtc = (a['endUtc'] as num).toInt();
+      if (status == 'canceled') {
+        continue;
+      } else if (endUtc < now) {
+        completed++;
+      } else {
+        upcoming++;
+      }
+    }
+    setState(() {
+      _upcomingCount = upcoming;
+      _completedCount = completed;
+      _totalVisits = upcoming + completed; // chosen metric for the 3rd banner
+    });
+  }
+
+  // Editing
   Future<void> _editName() async {
     final result = await _showEditSheet(
       title: 'Edit Full Name',
-      initial: _fullName,
+      initial: _fullName == '—' ? '' : _fullName,
       hint: 'Enter full name',
       keyboardType: TextInputType.name,
     );
-    if (result != null && result.trim().isNotEmpty) {
-      setState(() => _fullName = result.trim());
+    final value = result?.trim();
+    if (value != null && value.isNotEmpty && value != _fullName) {
+      await _patchProfile({'fullName': value});
+      setState(() => _fullName = value);
     }
   }
 
@@ -81,8 +139,31 @@ class _ProfilePageState extends State<PatientProfilePage> {
       hint: 'Enter phone number',
       keyboardType: TextInputType.phone,
     );
-    if (result != null) {
-      setState(() => _phone = result.trim());
+    final value = result?.trim();
+    if (value != null && value != _phone) {
+      await _patchProfile({'phone': value});
+      setState(() => _phone = value);
+    }
+  }
+
+  Future<void> _patchProfile(Map<String, dynamic> body) async {
+    try {
+      await _dio.patch(meBase, data: body); // PATCH /v1/me
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Profile updated')));
+      }
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final msg = e.response?.data is Map
+          ? (e.response!.data['error']?.toString())
+          : null;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg ?? 'Update failed (${code ?? ''})')),
+        );
+      }
     }
   }
 
@@ -133,9 +214,9 @@ class _ProfilePageState extends State<PatientProfilePage> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: kPrimaryDark),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: kPrimaryDark),
                   ),
                 ),
                 autofocus: true,
@@ -207,15 +288,44 @@ class _ProfilePageState extends State<PatientProfilePage> {
     );
 
     if (confirm != true) return;
-
     await AuthService.signOut();
-
     if (!mounted) return;
-
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const SignInAndSignUp()),
       (route) => false,
     );
+  }
+
+  void _onBottomNavTapped(int index) {
+    setState(() => _selectedIndex = index);
+    switch (index) {
+      case 0:
+        if (Navigator.canPop(context)) Navigator.pop(context);
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AllDoctorsPage()),
+        );
+        break;
+      case 2:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Add new - coming soon'),
+            backgroundColor: kPrimaryDark,
+          ),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const VisitsPage()),
+        );
+        break;
+      case 4:
+        // already here
+        break;
+    }
   }
 
   @override
@@ -223,7 +333,6 @@ class _ProfilePageState extends State<PatientProfilePage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
 
-      // Bottom navigation (same style as Dashboard)
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
@@ -248,145 +357,147 @@ class _ProfilePageState extends State<PatientProfilePage> {
         ),
       ),
 
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header Section with Profile Info (matched colors + decorative circles)
-            _headerWithCircles(),
-
-            const SizedBox(height: 16),
-
-            // Personal Information Section
-            _buildSection('Personal Information', [
-              _buildInfoTile(
-                Icons.person_outline,
-                'FULL NAME',
-                _fullName,
-                onTap: _editName,
-              ),
-              _buildInfoTile(
-                Icons.phone_outlined,
-                'PHONE NUMBER',
-                _phone,
-                onTap: _editPhone,
-              ),
-            ]),
-
-            // Quick Actions Section
-            _buildSection('Quick Actions', [
-              _buildActionTile(
-                Icons.event_note,
-                'My Appointments',
-                Colors.blue[100]!,
-                Colors.blue,
-                onTap: () => _onBottomNavTapped(3),
-              ),
-              _buildActionTile(
-                Icons.favorite_border,
-                'Find Doctors',
-                Colors.green[100]!,
-                Colors.green,
-                onTap: () => _onBottomNavTapped(1),
-              ),
-            ]),
-
-            // Account Settings Section
-            _buildSection('Account Settings', [
-              _buildActionTile(
-                Icons.notifications_none,
-                'Notifications',
-                Colors.purple[100]!,
-                Colors.purple,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const NotificationsPage()),
-                ),
-              ),
-              _buildActionTile(
-                Icons.lock_outline,
-                'Privacy & Security',
-                Colors.orange[100]!,
-                Colors.orange,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PrivacySecurityPage(),
+      body: RefreshIndicator(
+        onRefresh: _loadAll,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              if (_loading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 100),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Text(_error!, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: _loadAll,
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              _buildActionTile(
-                Icons.credit_card,
-                'Payment Methods',
-                Colors.blue[100]!,
-                Colors.blue,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PaymentMethodsPage()),
-                ),
-              ),
-              _buildActionTile(
-                Icons.settings_outlined,
-                'App Settings',
-                Colors.grey[300]!,
-                Colors.grey[700],
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AppSettingsPage()),
-                ),
-              ),
-            ]),
+                )
+              else ...[
+                _headerWithCircles(),
 
-            // Support & Help Section
-            _buildSection('Support & Help', [
-              _buildActionTile(
-                Icons.help_outline,
-                'Help & FAQ',
-                Colors.cyan[100]!,
-                Colors.cyan,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HelpFaqPage()),
-                ),
-              ),
-              _buildActionTile(
-                Icons.headset_mic_outlined,
-                'Contact Support',
-                Colors.teal[100]!,
-                Colors.teal,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ContactSupportPage()),
-                ),
-              ),
-            ]),
+                const SizedBox(height: 16),
 
-            const SizedBox(height: 16),
+                _buildSection('Personal Information', [
+                  _buildInfoTile(
+                    Icons.person_outline,
+                    'FULL NAME',
+                    _fullName,
+                    onTap: _editName,
+                  ),
+                  _buildInfoTile(
+                    Icons.phone_outlined,
+                    'PHONE NUMBER',
+                    _phone,
+                    onTap: _editPhone,
+                  ),
+                ]),
 
-            // Sign Out Button (kept red for destructive action)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red[100]!),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    'Sign Out',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600,
+                _buildSection('Quick Actions', [
+                  _buildActionTile(
+                    Icons.event_note,
+                    'My Appointments',
+                    Colors.blue[100]!,
+                    Colors.blue,
+                    onTap: () => _onBottomNavTapped(3),
+                  ),
+                  _buildActionTile(
+                    Icons.favorite_border,
+                    'Find Doctors',
+                    Colors.green[100]!,
+                    Colors.green,
+                    onTap: () => _onBottomNavTapped(1),
+                  ),
+                ]),
+
+                _buildSection('Account Settings', [
+                  _buildActionTile(
+                    Icons.notifications_none,
+                    'Notifications',
+                    Colors.purple[100]!,
+                    Colors.purple,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationsPage(),
+                      ),
                     ),
                   ),
-                  onTap: _handleSignOut,
-                ),
-              ),
-            ),
+                  _buildActionTile(
+                    Icons.lock_outline,
+                    'Privacy & Security',
+                    Colors.orange[100]!,
+                    Colors.orange,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PrivacySecurityPage(),
+                      ),
+                    ),
+                  ),
+                  _buildActionTile(
+                    Icons.credit_card,
+                    'Payment Methods',
+                    Colors.blue[100]!,
+                    Colors.blue,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PaymentMethodsPage(),
+                      ),
+                    ),
+                  ),
+                  _buildActionTile(
+                    Icons.settings_outlined,
+                    'App Settings',
+                    Colors.grey[300]!,
+                    Colors.grey[700],
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AppSettingsPage(),
+                      ),
+                    ),
+                  ),
+                ]),
 
-            const SizedBox(height: 32),
-          ],
+                const SizedBox(height: 16),
+
+                // Sign Out
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red[100]!),
+                    ),
+                    child: ListTile(
+                      leading: const Icon(Icons.logout, color: Colors.red),
+                      title: const Text(
+                        'Sign Out',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      onTap: _handleSignOut,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -403,14 +514,13 @@ class _ProfilePageState extends State<PatientProfilePage> {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [kPrimaryDark, kPrimary], // same as Dashboard
+            colors: [kPrimaryDark, kPrimary],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
         child: Stack(
           children: [
-            // Decorative circles
             Positioned(
               top: -40,
               left: -40,
@@ -427,29 +537,36 @@ class _ProfilePageState extends State<PatientProfilePage> {
               child: _circle(100, Colors.white.withOpacity(0.05)),
             ),
 
-            // Content
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    // Profile Avatar
+                    // Avatar
                     Container(
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(16),
+                        image: (_photoUrl != null && _photoUrl!.isNotEmpty)
+                            ? DecorationImage(
+                                image: NetworkImage(_photoUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                       ),
-                      child: const Icon(
-                        Icons.person_outline,
-                        size: 40,
-                        color: Colors.white,
-                      ),
+                      child: (_photoUrl == null || _photoUrl!.isEmpty)
+                          ? const Icon(
+                              Icons.person_outline,
+                              size: 40,
+                              color: Colors.white,
+                            )
+                          : null,
                     ),
                     const SizedBox(height: 12),
 
-                    // Name and Edit Icon
+                    // Name + edit
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -474,23 +591,35 @@ class _ProfilePageState extends State<PatientProfilePage> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Stats Row
+                    // Stats Row (Upcoming, Completed, Total Visits)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildStatItem(Icons.event_note, '0', 'Upcoming'),
+                        _buildStatItem(
+                          Icons.event_note,
+                          '$_upcomingCount',
+                          'Upcoming',
+                        ),
                         Container(
                           height: 40,
                           width: 1,
                           color: Colors.white.withOpacity(0.3),
                         ),
-                        _buildStatItem(Icons.favorite_border, '0', 'Completed'),
+                        _buildStatItem(
+                          Icons.favorite_border,
+                          '$_completedCount',
+                          'Completed',
+                        ),
                         Container(
                           height: 40,
                           width: 1,
                           color: Colors.white.withOpacity(0.3),
                         ),
-                        _buildStatItem(Icons.star_border, '4.8', 'Rating'),
+                        _buildStatItem(
+                          Icons.star_border,
+                          '$_totalVisits',
+                          'Total Visits',
+                        ),
                       ],
                     ),
                   ],

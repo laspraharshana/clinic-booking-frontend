@@ -8,9 +8,18 @@ class HelpFaqPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final faqs = [
-      {'q': 'How do I book an appointment?', 'a': 'Search for a doctor and tap Book Appointment.'},
-      {'q': 'How can I cancel?', 'a': 'Go to Visits > Upcoming > select appointment > Cancel.'},
-      {'q': 'How do payments work?', 'a': 'You can pay online via the Payment Methods section.'},
+      {
+        'q': 'How do I book an appointment?',
+        'a': 'Search for a doctor and tap Book Appointment.',
+      },
+      {
+        'q': 'How can I cancel?',
+        'a': 'Go to Visits > Upcoming > select appointment > Cancel.',
+      },
+      {
+        'q': 'How do payments work?',
+        'a': 'You can pay online via the Payment Methods section.',
+      },
     ];
 
     return Scaffold(

@@ -1,78 +1,126 @@
 import 'package:flutter/material.dart';
 import 'admin_navbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dio/dio.dart';
 // import 'admin_doctors_page.dart';
 // import 'admin_patients_page.dart';
 // import 'admin_appointments_page.dart';
 import 'reports_page.dart';
 
-class AdminDashboard extends StatelessWidget {
+class AdminDashboard extends StatefulWidget {
   const AdminDashboard({Key? key}) : super(key: key);
 
-  // -------------------- DASHBOARD CONTENT --------------------
   @override
-  Widget build(BuildContext) {
+  State<AdminDashboard> createState() => _AdminDashboardState();
+}
+
+class _AdminDashboardState extends State<AdminDashboard> {
+  bool _loading = true;
+  int totalDoctors = 0;
+  int totalPatients = 0;
+  int totalAppointments = 0;
+  double earnings = 0;
+  List<dynamic> recentAppointments = [];
+
+  static const String baseUrl = 'http://localhost:8080/v1/admin';
+  final Dio _dio = Dio();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDashboardData();
+  }
+
+  Future<void> _fetchDashboardData() async {
+    try {
+      final token = await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (token == null) throw Exception('User not authenticated');
+
+      final response = await _dio.get(
+        '$baseUrl/dashboard',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      final data = response.data as Map<String, dynamic>;
+
+      setState(() {
+        totalDoctors = data['totalDoctors'] ?? 0;
+        totalPatients = data['totalPatients'] ?? 0;
+        totalAppointments = (data['recentAppointments'] as List?)?.length ?? 0;
+        earnings = (data['earnings'] ?? 0).toDouble();
+        recentAppointments = data['recentAppointments'] ?? [];
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() => _loading = false);
+      print('Failed to fetch dashboard: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: const ABottomNavBar(
-        selectedIndex: 0,
-      ), // 0-4 for different pages
-      body: CustomScrollView(
-        slivers: [
-          // Header
-          SliverToBoxAdapter(child: _buildHeader()),
-
-          // Stats Grid
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.4,
-              ),
-              delegate: SliverChildListDelegate([
-                _buildStatCard(
-                  'Total Doctors',
-                  '156',
-                  Icons.people_outline,
-                  const Color(0xFFE3F2FD),
-                  const Color(0xFF2196F3),
+      bottomNavigationBar: const ABottomNavBar(selectedIndex: 0),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(child: _buildHeader()),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 1.4,
+                        ),
+                    delegate: SliverChildListDelegate([
+                      _buildStatCard(
+                        'Total Doctors',
+                        '$totalDoctors',
+                        Icons.people_outline,
+                        const Color(0xFFE3F2FD),
+                        const Color(0xFF2196F3),
+                      ),
+                      _buildStatCard(
+                        'Total Patients',
+                        '$totalPatients',
+                        Icons.person_outline,
+                        const Color(0xFFE0F7FA),
+                        const Color(0xFF00BCD4),
+                      ),
+                      _buildStatCard(
+                        'Appointments',
+                        '$totalAppointments',
+                        Icons.calendar_today_outlined,
+                        const Color(0xFFF3E5F5),
+                        const Color(0xFF9C27B0),
+                      ),
+                      _buildStatCard(
+                        'Earnings',
+                        '\$${earnings.toStringAsFixed(2)}',
+                        Icons.payments_outlined,
+                        const Color(0xFFFFF9C4),
+                        const Color(0xFFFFC107),
+                      ),
+                    ]),
+                  ),
                 ),
-                _buildStatCard(
-                  'Total Patients',
-                  '3,842',
-                  Icons.person_outline,
-                  const Color(0xFFE0F7FA),
-                  const Color(0xFF00BCD4),
-                ),
-                _buildStatCard(
-                  'Appointments',
-                  '284',
-                  Icons.calendar_today_outlined,
-                  const Color(0xFFF3E5F5),
-                  const Color(0xFF9C27B0),
-                ),
-                _buildStatCard(
-                  'Earnings',
-                  '\$12.4K',
-                  Icons.payments_outlined,
-                  const Color(0xFFFFF9C4),
-                  const Color(0xFFFFC107),
-                ),
-              ]),
+                SliverToBoxAdapter(child: _buildQuickActions()),
+                SliverToBoxAdapter(child: _buildRecentAppointments()),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
             ),
-          ),
-
-          // Quick Actions
-          SliverToBoxAdapter(child: _buildQuickActions()),
-
-          // Recent Appointments
-          SliverToBoxAdapter(child: _buildRecentAppointments()),
-
-          // Bottom padding
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
-      ),
     );
   }
 
@@ -82,7 +130,7 @@ class AdminDashboard extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [const Color(0xFF1B5E57), Color.fromARGB(255, 16, 72, 67)],
+          colors: [Color(0xFF008B8B), Color.fromARGB(255, 16, 72, 67)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -219,7 +267,6 @@ class AdminDashboard extends StatelessWidget {
             children: [
               _buildActionCard(
                 'Add Doctor',
-
                 Icons.person_add_outlined,
                 const Color(0xFFE3F2FD),
                 const Color(0xFF2196F3),
@@ -272,7 +319,6 @@ class AdminDashboard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -327,12 +373,13 @@ class AdminDashboard extends StatelessWidget {
                 ),
               ),
               GestureDetector(
-                onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (_) => const AdminAppointmentsPage()),
-                  // );
-                },
+                onTap:
+                    (
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (_) => const AdminAppointmentsPage()),
+                      // );
+                    ) {},
                 child: const Text(
                   'View All',
                   style: TextStyle(
@@ -345,34 +392,15 @@ class AdminDashboard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _buildAppointmentItem(
-            'Sarah Johnson',
-            'Dr. Smith',
-            '10:30 AM',
-            'confirmed',
-            Colors.green,
-          ),
-          _buildAppointmentItem(
-            'Mike Chen',
-            'Dr. Williams',
-            '11:45 AM',
-            'pending',
-            Colors.orange,
-          ),
-          _buildAppointmentItem(
-            'Emily Davis',
-            'Dr. Brown',
-            '02:15 PM',
-            'confirmed',
-            Colors.green,
-          ),
-          _buildAppointmentItem(
-            'James Wilson',
-            'Dr. Jones',
-            '04:00 PM',
-            'canceled',
-            Colors.red,
-          ),
+          ...recentAppointments.map((appt) {
+            return _buildAppointmentItem(
+              appt['patientName'] ?? 'Unknown',
+              appt['doctorName'] ?? 'Unknown',
+              appt['time'] ?? '-',
+              appt['status'] ?? 'pending',
+              _getStatusColor(appt['status']),
+            );
+          }).toList(),
         ],
       ),
     );
@@ -465,5 +493,18 @@ class AdminDashboard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case 'confirmed':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'canceled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

@@ -2,7 +2,7 @@
 // ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart';
-    //show defaultTargetPlatform, kIsWeb, TargetPlatform;
+//show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart';
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -58,6 +55,15 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyC1XNIgjHWINV44521HXp6UfzeGfkVxug8',
+    appId: '1:845708086002:web:6c44990caae15783021e6b',
+    messagingSenderId: '845708086002',
+    projectId: 'clinic-booking-app-a6f1b',
+    authDomain: 'clinic-booking-app-a6f1b.firebaseapp.com',
+    storageBucket: 'clinic-booking-app-a6f1b.firebasestorage.app',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyC1XNIgjHWINV44521HXp6UfzeGfkVxug8',
     appId: '1:845708086002:web:6c44990caae15783021e6b',
     messagingSenderId: '845708086002',

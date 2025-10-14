@@ -44,7 +44,8 @@ class _SettingsPageState extends State<SettingsPage> {
       _sms = p.getBool('settings_sms') ?? _sms;
 
       // For demo password if not set
-      p.getString('settings_password') ?? p.setString('settings_password', 'admin123');
+      p.getString('settings_password') ??
+          p.setString('settings_password', 'admin123');
     });
   }
 
@@ -85,9 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _openLanguage() async {
     final selected = await Navigator.push<String>(
       context,
-      MaterialPageRoute(
-        builder: (_) => LanguagePage(current: _language),
-      ),
+      MaterialPageRoute(builder: (_) => LanguagePage(current: _language)),
     );
     if (selected != null) {
       setState(() => _language = selected);
@@ -96,17 +95,16 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _toast(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: kPrimaryDark,
-    ));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: kPrimaryDark));
   }
 
   void _logout() {
     // TODO: Replace with your real Sign-In page
-  //  Navigator.of(context).pushAndRemoveUntil(//add to the login page
-     // MaterialPageRoute(builder: (_) => const DemoSignInPage()),
-     // (route) => false,
+    //  Navigator.of(context).pushAndRemoveUntil(//add to the login page
+    // MaterialPageRoute(builder: (_) => const DemoSignInPage()),
+    // (route) => false,
     //);
   }
 
@@ -114,7 +112,13 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final initials = _name.trim().isEmpty
         ? 'A'
-        : _name.trim().split(RegExp(r'\s+')).map((e) => e[0]).take(2).join().toUpperCase();
+        : _name
+              .trim()
+              .split(RegExp(r'\s+'))
+              .map((e) => e[0])
+              .take(2)
+              .join()
+              .toUpperCase();
 
     return Scaffold(
       bottomNavigationBar: const ABottomNavBar(
@@ -154,14 +158,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Settings',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                          )),
+                      Text(
+                        'Settings',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       SizedBox(height: 2),
-                      Text('Manage your preferences', style: TextStyle(color: Colors.white70)),
+                      Text(
+                        'Manage your preferences',
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     ],
                   ),
                 ),
@@ -208,15 +217,24 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(_name,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w700, fontSize: 16)),
+                              Text(
+                                _name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text(_email, style: const TextStyle(color: Colors.black54)),
+                              Text(
+                                _email,
+                                style: const TextStyle(color: Colors.black54),
+                              ),
                               const SizedBox(height: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFEAF3F1),
                                   borderRadius: BorderRadius.circular(10),
@@ -232,7 +250,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -325,7 +343,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       icon: const Icon(Icons.logout, color: Colors.red),
                       label: const Text(
                         'Logout',
-                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFEEF0),
@@ -410,10 +431,7 @@ class _NavTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: _IconBadge(icon: icon),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -492,7 +510,11 @@ class _ProfileResult {
 class ProfileSettingsPage extends StatefulWidget {
   final String name;
   final String email;
-  const ProfileSettingsPage({super.key, required this.name, required this.email});
+  const ProfileSettingsPage({
+    super.key,
+    required this.name,
+    required this.email,
+  });
 
   @override
   State<ProfileSettingsPage> createState() => _ProfileSettingsPageState();
@@ -521,7 +543,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     await prefs.setString('settings_name', _nameCtrl.text.trim());
     await prefs.setString('settings_email', _emailCtrl.text.trim());
     if (!mounted) return;
-    Navigator.pop(context, _ProfileResult(_nameCtrl.text.trim(), _emailCtrl.text.trim()));
+    Navigator.pop(
+      context,
+      _ProfileResult(_nameCtrl.text.trim(), _emailCtrl.text.trim()),
+    );
   }
 
   @override
@@ -554,9 +579,17 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 onPressed: _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ],
@@ -571,9 +604,18 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       prefixIcon: Icon(icon),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: kPrimaryDark)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: kPrimaryDark),
+      ),
     );
   }
 }
@@ -619,9 +661,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   void _toast(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: kPrimaryDark),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: kPrimaryDark));
   }
 
   @override
@@ -641,22 +683,37 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               TextFormField(
                 controller: _oldCtrl,
                 obscureText: _obscureOld,
-                validator: (v) => (v == null || v.isEmpty) ? 'Enter old password' : null,
-                decoration: _pwdDec('Old password', _obscureOld, () => setState(() => _obscureOld = !_obscureOld)),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Enter old password' : null,
+                decoration: _pwdDec(
+                  'Old password',
+                  _obscureOld,
+                  () => setState(() => _obscureOld = !_obscureOld),
+                ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _newCtrl,
                 obscureText: _obscureNew,
-                validator: (v) => (v == null || v.length < 6) ? 'Min 6 characters' : null,
-                decoration: _pwdDec('New password', _obscureNew, () => setState(() => _obscureNew = !_obscureNew)),
+                validator: (v) =>
+                    (v == null || v.length < 6) ? 'Min 6 characters' : null,
+                decoration: _pwdDec(
+                  'New password',
+                  _obscureNew,
+                  () => setState(() => _obscureNew = !_obscureNew),
+                ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _confirmCtrl,
                 obscureText: _obscureConfirm,
-                validator: (v) => (v == null || v.isEmpty) ? 'Confirm password' : null,
-                decoration: _pwdDec('Confirm password', _obscureConfirm, () => setState(() => _obscureConfirm = !_obscureConfirm)),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Confirm password' : null,
+                decoration: _pwdDec(
+                  'Confirm password',
+                  _obscureConfirm,
+                  () => setState(() => _obscureConfirm = !_obscureConfirm),
+                ),
               ),
               const Spacer(),
               SizedBox(
@@ -666,9 +723,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kPrimary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -688,9 +753,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       ),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: kPrimaryDark)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: kPrimaryDark),
+      ),
     );
   }
 }
@@ -750,9 +824,17 @@ class _LanguagePageState extends State<LanguagePage> {
                 onPressed: _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ),
@@ -777,9 +859,16 @@ class DemoSignInPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(decoration: const InputDecoration(labelText: 'Email'), controller: emailCtrl),
+            TextField(
+              decoration: const InputDecoration(labelText: 'Email'),
+              controller: emailCtrl,
+            ),
             const SizedBox(height: 8),
-            TextField(decoration: const InputDecoration(labelText: 'Password'), controller: pwdCtrl, obscureText: true),
+            TextField(
+              decoration: const InputDecoration(labelText: 'Password'),
+              controller: pwdCtrl,
+              obscureText: true,
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
