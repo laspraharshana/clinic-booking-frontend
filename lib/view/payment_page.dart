@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:clinic_booking_frontend/core/network/dio_client.dart';
 import 'test_booking_confirmed_page.dart';
@@ -9,7 +10,7 @@ class PaymentPage extends StatefulWidget {
   final String dateTime;
   final double totalAmount;
 
-  // NEW inputs from BookAppointmentPage
+  // Inputs from BookAppointmentPage
   final String slotId;
   final String? patientName;
   final String? notes;
@@ -30,10 +31,20 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  // Card fields
   final TextEditingController nameController = TextEditingController();
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryController = TextEditingController();
   final TextEditingController cvvController = TextEditingController();
+
+  // PayPal
+  final TextEditingController paypalEmailController = TextEditingController();
+
+  // Bank transfer
+  bool _bankAgree = false;
+  String? _bankError;
 
   String selectedMethod = "Credit/Debit Card";
 
@@ -46,7 +57,17 @@ class _PaymentPageState extends State<PaymentPage> {
   void initState() {
     super.initState();
     _dio = createDio();
-    _loadQuote(); // optional: confirm totals from server
+    _loadQuote(); // confirm totals from server
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    cardNumberController.dispose();
+    expiryController.dispose();
+    cvvController.dispose();
+    paypalEmailController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadQuote() async {
@@ -58,13 +79,33 @@ class _PaymentPageState extends State<PaymentPage> {
         _quotedTotal = (fee['total'] as num).toDouble();
         _currency = (fee['currency'] as String?) ?? 'LKR';
       });
-    } catch (_) {/* keep UI usable */}
+    } catch (_) {
+      // keep UI usable
+    }
   }
 
   Future<void> _bookAppointment() async {
     if (_paying) return;
-    setState(() => _paying = true);
 
+    // Validate per method
+    if (selectedMethod == 'Credit/Debit Card' || selectedMethod == 'PayPal') {
+      if (!_formKey.currentState!.validate()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fix errors before continuing')),
+        );
+        return;
+      }
+    } else if (selectedMethod == 'Bank Transfer') {
+      if (!_bankAgree) {
+        setState(() => _bankError = 'Please confirm you agree to complete the transfer.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please confirm bank transfer acknowledgement')),
+        );
+        return;
+      }
+    }
+
+    setState(() => _paying = true);
     try {
       final res = await _dio.post('/v1/appointments/book', data: {
         'slotId': widget.slotId,
@@ -72,13 +113,11 @@ class _PaymentPageState extends State<PaymentPage> {
         if (widget.patientName != null && widget.patientName!.isNotEmpty) 'patientName': widget.patientName,
       });
 
-      // Parse appointment from server
       final appt = Map<String, dynamic>.from((res.data as Map)['data'] as Map);
       final fee = Map<String, dynamic>.from(appt['fee'] as Map);
 
       if (!mounted) return;
 
-      // Navigate to Booking Confirmed page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -115,6 +154,28 @@ class _PaymentPageState extends State<PaymentPage> {
       }
     } finally {
       if (mounted) setState(() => _paying = false);
+    }
+  }
+
+  void _clearPaymentInputs() {
+    nameController.clear();
+    cardNumberController.clear();
+    expiryController.clear();
+    cvvController.clear();
+    paypalEmailController.clear();
+    _bankAgree = false;
+    _bankError = null;
+  }
+
+  String _payButtonText() {
+    final total = (_quotedTotal ?? widget.totalAmount).toStringAsFixed(0);
+    switch (selectedMethod) {
+      case 'PayPal':
+        return 'Pay with PayPal $_currency $total';
+      case 'Bank Transfer':
+        return 'Confirm (Bank Transfer)';
+      default:
+        return 'Pay $_currency $total';
     }
   }
 
@@ -173,7 +234,10 @@ class _PaymentPageState extends State<PaymentPage> {
                   DropdownMenuItem(value: "PayPal", child: Text("PayPal")),
                   DropdownMenuItem(value: "Bank Transfer", child: Text("Bank Transfer")),
                 ],
-                onChanged: (value) => setState(() => selectedMethod = value!),
+                onChanged: (value) => setState(() {
+                  selectedMethod = value!;
+                  _clearPaymentInputs(); // clear inputs when switching method
+                }),
                 decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                 icon: const Icon(Icons.keyboard_arrow_down),
               ),
@@ -182,42 +246,11 @@ class _PaymentPageState extends State<PaymentPage> {
 
           const SizedBox(height: 24),
 
-          // Card Details (simulated)
-          Row(children: const [Icon(Icons.credit_card, size: 20), SizedBox(width: 8), Text("Card Details", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))]),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
-            ),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text("Cardholder Name", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
-              const SizedBox(height: 8),
-              TextField(controller: nameController, decoration: _inputDecoration("Enter your name")),
-              const SizedBox(height: 16),
-              const Text("Card Number", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: cardNumberController,
-                keyboardType: TextInputType.number,
-                decoration: _inputDecoration("1234 5678 9012 3456").copyWith(prefixIcon: const Icon(Icons.credit_card, size: 20)),
-              ),
-              const SizedBox(height: 16),
-              Row(children: [
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text("Expiry Date", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
-                  const SizedBox(height: 8),
-                  TextField(controller: expiryController, decoration: _inputDecoration("MM/YY")),
-                ])),
-                const SizedBox(width: 12),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text("CVV", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
-                  const SizedBox(height: 8),
-                  TextField(controller: cvvController, obscureText: true, keyboardType: TextInputType.number, decoration: _inputDecoration("123")),
-                ])),
-              ]),
-            ]),
+          // Method-specific fields wrapped in a Form for validation
+          Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: _buildMethodFields(),
           ),
 
           const SizedBox(height: 24),
@@ -234,13 +267,230 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
               child: _paying
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text("Pay ${_currency} ${( _quotedTotal ?? widget.totalAmount ).toStringAsFixed(0)}",
+                  : Text(_payButtonText(),
                   style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600)),
             ),
           ),
         ]),
       ),
     );
+  }
+
+  // Method-specific UI
+  Widget _buildMethodFields() {
+    switch (selectedMethod) {
+      case 'PayPal':
+        return _buildPayPalFields();
+      case 'Bank Transfer':
+        return _buildBankTransferFields();
+      default:
+        return _buildCardFields();
+    }
+  }
+
+  Widget _buildCardFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: const [
+          Icon(Icons.credit_card, size: 20),
+          SizedBox(width: 8),
+          Text('Card Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ]),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text("Cardholder Name", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: nameController,
+              onChanged: (_) => setState(() {}),
+              decoration: _inputDecoration("Enter your name"),
+              validator: (v) => (v == null || v.trim().length < 2) ? 'Enter a valid name' : null,
+            ),
+            const SizedBox(height: 16),
+            const Text("Card Number", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: cardNumberController,
+              onChanged: (_) => setState(() {}),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: _inputDecoration("16-digit number"),
+              validator: (v) {
+                final raw = (v ?? '').replaceAll(' ', '');
+                if (raw.length != 16) return 'Enter 16 digits';
+                if (!_luhnCheck(raw)) return 'Invalid card number';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            Row(children: [
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text("Expiry Date (MM/YY)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: expiryController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: _inputDecoration("MM/YY"),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9/]'))],
+                    validator: (v) => _validateExpiry(v ?? ''),
+                  ),
+                ]),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text("CVV", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: cvvController,
+                    onChanged: (_) => setState(() {}),
+                    obscureText: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: _inputDecoration("3 or 4 digits"),
+                    validator: (v) {
+                      final raw = (v ?? '').trim();
+                      if (raw.length < 3 || raw.length > 4) return 'Enter 3–4 digits';
+                      return null;
+                    },
+                  ),
+                ]),
+              ),
+            ]),
+          ]),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPayPalFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: const [
+          Icon(Icons.account_balance_wallet, size: 20),
+          SizedBox(width: 8),
+          Text('PayPal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ]),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('PayPal Email', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: paypalEmailController,
+                onChanged: (_) => setState(() {}),
+                decoration: _inputDecoration('you@example.com'),
+                keyboardType: TextInputType.emailAddress,
+                validator: (v) {
+                  final s = (v ?? '').trim();
+                  final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s);
+                  return ok ? null : 'Enter a valid email';
+                },
+              ),
+              const SizedBox(height: 8),
+              const Text('You will be redirected to PayPal (simulated). No card details required.',
+                  style: TextStyle(color: Colors.black54)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBankTransferFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: const [
+          Icon(Icons.account_balance, size: 20),
+          SizedBox(width: 8),
+          Text('Bank Transfer', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ]),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Bank: ABC Bank • Account: 123-456-789', style: TextStyle(color: Colors.black87)),
+              const SizedBox(height: 8),
+              const Text('Use your name as the payment reference.', style: TextStyle(color: Colors.black54)),
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _bankAgree,
+                onChanged: (v) => setState(() {
+                  _bankAgree = v ?? false;
+                  _bankError = null;
+                }),
+                title: const Text('I agree to complete the bank transfer and provide reference if requested.'),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              if (_bankError != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 4),
+                  child: Text(_bankError!, style: const TextStyle(color: Colors.red)),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Validators/utils
+  String? _validateExpiry(String input) {
+    final s = input.trim();
+    if (!RegExp(r'^\d{2}/\d{2}$').hasMatch(s)) return 'Use MM/YY';
+    final parts = s.split('/');
+    final mm = int.tryParse(parts[0]) ?? 0;
+    final yy = int.tryParse(parts[1]) ?? -1;
+    if (mm < 1 || mm > 12) return 'Invalid month';
+    // Interpret YY as 2000+YY (e.g., 25 -> 2025)
+    final year = 2000 + yy;
+    final endOfMonth = DateTime(year, mm + 1).subtract(const Duration(milliseconds: 1));
+    final now = DateTime.now();
+    if (endOfMonth.isBefore(DateTime(now.year, now.month, now.day))) {
+      return 'Card expired';
+    }
+    return null;
+  }
+
+  bool _luhnCheck(String number) {
+    // number contains only digits at this point
+    int sum = 0;
+    bool alt = false;
+    for (int i = number.length - 1; i >= 0; i--) {
+      int n = int.parse(number[i]);
+      if (alt) {
+        n *= 2;
+        if (n > 9) n -= 9;
+      }
+      sum += n;
+      alt = !alt;
+    }
+    return sum % 10 == 0;
   }
 
   InputDecoration _inputDecoration(String hint) {

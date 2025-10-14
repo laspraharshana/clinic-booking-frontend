@@ -37,7 +37,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _name = p.getString('settings_name') ?? _name;
       _email = p.getString('settings_email') ?? _email;
       _language = p.getString('settings_language') ?? _language;
-      _push = p.getBool('settings_push') ?? _pus
+      _push = p.getBool('settings_push') ?? _push;
       _emailNoti = p.getBool('settings_emailNoti') ?? _emailNoti;
       _sms = p.getBool('settings_sms') ?? _sms;
 

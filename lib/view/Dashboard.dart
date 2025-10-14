@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'Bottom_navbar.dart';
-import 'Doctor_list.dart';
+import 'package:dio/dio.dart';
+import '../core/network/dio_client.dart';
+import 'doctor_list.dart';     // ensure this path/case matches your project
 import 'patient_profile.dart';
 import 'visits_page.dart';
-import 'Doctor_list.dart';
 
 class PlaceholderPage extends StatelessWidget {
   final String title;
@@ -33,11 +33,34 @@ class _DashboardState extends State<Dashboard> {
   String _displayName = 'User';
   StreamSubscription<User?>? _authSub;
 
+  late final Dio _dio;
+
+  // Header stats
+  int _upcomingCount = 0;
+  int _completedCount = 0;
+
+  // Specialty counts for cards
+  // keys exactly match the card titles below
+  final Map<String, int> _specCounts = {
+    'Cardiology': 0,
+    'Neurology': 0,
+    'Pediatrics': 0,
+    'Eye Care': 0,
+    'Orthopedics': 0,
+    'General': 0,
+  };
+
+  bool _loadingStats = true;
+
   @override
   void initState() {
     super.initState();
+    _dio = createDio();
+
     _setName(FirebaseAuth.instance.currentUser);
     _authSub = FirebaseAuth.instance.userChanges().listen((u) => _setName(u));
+
+    _loadHeaderData();
   }
 
   void _setName(User? u) {
@@ -65,6 +88,91 @@ class _DashboardState extends State<Dashboard> {
     super.dispose();
   }
 
+  Future<void> _loadHeaderData() async {
+    setState(() => _loadingStats = true);
+    try {
+      await Future.wait([
+        _fetchAppointmentsCounts(),
+        _fetchSpecialtyCounts(),
+      ]);
+    } finally {
+      if (mounted) setState(() => _loadingStats = false);
+    }
+  }
+
+  // GET /v1/appointments/me → compute upcoming/completed (ignoring canceled)
+  Future<void> _fetchAppointmentsCounts() async {
+    final res = await _dio.get('/v1/appointments/me');
+    final list = (res.data['data'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    int upcoming = 0;
+    int completed = 0;
+
+    for (final a in list) {
+      final status = (a['status'] as String?) ?? 'booked';
+      if (status == 'canceled') continue;
+
+      final endUtc = (a['endUtc'] as num).toInt();
+      if (endUtc < now) {
+        completed++;
+      } else {
+        upcoming++;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _upcomingCount = upcoming;
+        _completedCount = completed;
+      });
+    }
+  }
+
+  // GET /v1/doctors → compute counts for card specialties
+  Future<void> _fetchSpecialtyCounts() async {
+    final res = await _dio.get('/v1/doctors');
+    final list = (res.data['data'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+
+    // Raw counts by backend specialty
+    final Map<String, int> raw = {};
+    for (final d in list) {
+      String spec = (d['specialty'] as String? ?? '').trim();
+      if (spec.isEmpty) spec = 'General';
+      raw[spec] = (raw[spec] ?? 0) + 1;
+    }
+
+    // Map backend specialties to your card categories
+    // Eye Care should include Ophthalmology and "Eye Care" if present
+    const Map<String, List<String>> groups = {
+      'Cardiology': ['Cardiology'],
+      'Neurology': ['Neurology'],
+      'Pediatrics': ['Pediatrics'],
+      'Eye Care': ['Ophthalmology', 'Eye Care'],
+      'Orthopedics': ['Orthopedics'],
+      'General': ['General', 'General Medicine', 'Family Medicine', 'Internal Medicine'],
+    };
+
+    final Map<String, int> cardCounts = {
+      'Cardiology': 0, 'Neurology': 0, 'Pediatrics': 0,
+      'Eye Care': 0, 'Orthopedics': 0, 'General': 0,
+    };
+
+    raw.forEach((spec, count) {
+      groups.forEach((card, specs) {
+        if (specs.contains(spec)) {
+          cardCounts[card] = (cardCounts[card] ?? 0) + count;
+        }
+      });
+    });
+
+    if (mounted) {
+      setState(() {
+        _specCounts.addAll(cardCounts);
+      });
+    }
+  }
+
   void _onBottomNavTapped(int index) {
     setState(() => _selectedIndex = index);
     switch (index) {
@@ -80,7 +188,7 @@ class _DashboardState extends State<Dashboard> {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const VisitsPage()));
         break;
       case 4:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderPage(title: "Profile Page")));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const PatientProfilePage()));
         break;
     }
   }
@@ -108,130 +216,185 @@ class _DashboardState extends State<Dashboard> {
         ),
       ),
 
-      body: _buildDashboardBody(),
+      body: RefreshIndicator(
+        onRefresh: _loadHeaderData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: _buildDashboardBody(),
+        ),
+      ),
     );
   }
 
   Widget _buildDashboardBody() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1B5E57), Color(0xFF00695C)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1B5E57), Color(0xFF00695C)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const CircleAvatar(
-                          radius: 26,
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.person, color: Colors.black54),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Good Afternoon",
-                                style: TextStyle(fontSize: 14, color: Colors.white70)),
-                            Text(_displayName,
-                                style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const Icon(Icons.notifications_none, size: 28, color: Colors.white),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Search → open Find
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: const Offset(0, 3))],
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const CircleAvatar(
+                        radius: 26,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, color: Colors.black54),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Good Afternoon", style: TextStyle(fontSize: 14, color: Colors.white70)),
+                          Text(_displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                        ],
+                      ),
+                    ],
                   ),
-                  child: TextField(
-                    readOnly: true,
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AllDoctorsPage())),
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.search),
-                      hintText: "Search doctors, symptoms, specialties...",
-                      border: InputBorder.none,
-                    ),
+                  const Icon(Icons.notifications_none, size: 28, color: Colors.white),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Search → open Find
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: const Offset(0, 3))],
+                ),
+                child: TextField(
+                  readOnly: true,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AllDoctorsPage())),
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.search),
+                    hintText: "Search doctors, symptoms, specialties...",
+                    border: InputBorder.none,
                   ),
                 ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
-          // Stats
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(child: _buildStatCard("Upcoming", "0", Icons.calendar_today, Colors.green)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildStatCard("Completed", "0", Icons.check_circle, Colors.teal)),
-              ],
-            ),
+        // Stats (real counts)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  "Upcoming",
+                  _loadingStats ? "…" : _upcomingCount.toString(),
+                  Icons.calendar_today,
+                  Colors.green,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatCard(
+                  "Completed",
+                  _loadingStats ? "…" : _completedCount.toString(),
+                  Icons.check_circle,
+                  Colors.teal,
+                ),
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 30),
+        const SizedBox(height: 30),
 
-          // Specialties Section
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text("Medical Specialties", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        // Specialties Section
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text("Medical Specialties", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        const SizedBox(height: 15),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _buildSpecialtyCard(
+                context,
+                "Cardiology",
+                _loadingStats ? "…" : "${_specCounts['Cardiology'] ?? 0} doctors",
+                Icons.favorite,
+                Colors.red,
+                const AllDoctorsPage(initialSpecialty: "Cardiology"),
+              ),
+              _buildSpecialtyCard(
+                context,
+                "Neurology",
+                _loadingStats ? "…" : "${_specCounts['Neurology'] ?? 0} doctors",
+                Icons.psychology,
+                Colors.purple,
+                const AllDoctorsPage(initialSpecialty: "Neurology"),
+              ),
+              _buildSpecialtyCard(
+                context,
+                "Pediatrics",
+                _loadingStats ? "…" : "${_specCounts['Pediatrics'] ?? 0} doctors",
+                Icons.child_care,
+                Colors.pink,
+                const AllDoctorsPage(initialSpecialty: "Pediatrics"),
+              ),
+              _buildSpecialtyCard(
+                context,
+                "Eye Care",
+                _loadingStats ? "…" : "${_specCounts['Eye Care'] ?? 0} doctors",
+                Icons.remove_red_eye,
+                Colors.blue,
+                const AllDoctorsPage(initialSpecialty: "Eye Care"),
+              ),
+              _buildSpecialtyCard(
+                context,
+                "Orthopedics",
+                _loadingStats ? "…" : "${_specCounts['Orthopedics'] ?? 0} doctors",
+                Icons.fitness_center,
+                Colors.orange,
+                const AllDoctorsPage(initialSpecialty: "Orthopedics"),
+              ),
+              _buildSpecialtyCard(
+                context,
+                "General",
+                _loadingStats ? "…" : "${_specCounts['General'] ?? 0} doctors",
+                Icons.medical_services,
+                Colors.teal,
+                const AllDoctorsPage(initialSpecialty: "General"),
+              ),
+            ],
           ),
-          const SizedBox(height: 15),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildSpecialtyCard(context, "Cardiology", "24 doctors", Icons.favorite, Colors.red, const AllDoctorsPage(initialSpecialty: "Cardiology")),
-                _buildSpecialtyCard(context, "Neurology", "18 doctors", Icons.psychology, Colors.purple, const AllDoctorsPage(initialSpecialty: "Neurology")),
-                _buildSpecialtyCard(context, "Pediatrics", "32 doctors", Icons.child_care, Colors.pink, const AllDoctorsPage(initialSpecialty: "Pediatrics")),
-                _buildSpecialtyCard(context, "Eye Care", "15 doctors", Icons.remove_red_eye, Colors.blue, const AllDoctorsPage(initialSpecialty: "Eye Care")),
-                _buildSpecialtyCard(context, "Orthopedics", "28 doctors", Icons.fitness_center, Colors.orange, const AllDoctorsPage(initialSpecialty: "Orthopedics")),
-                _buildSpecialtyCard(context, "General", "45 doctors", Icons.medical_services, Colors.teal, const AllDoctorsPage(initialSpecialty: "General")),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
